@@ -1,6 +1,6 @@
 # AwsExRay
 
-**TODO: Add description**
+## IN PROGRESS
 
 ## Installation
 
