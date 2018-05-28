@@ -1,4 +1,4 @@
-defmodule AwsExRay.ClientPool do
+defmodule AwsExRay.Client.UDPClientSupervisor do
 
   use Supervisor
   alias AwsExRay.Config
@@ -7,7 +7,7 @@ defmodule AwsExRay.ClientPool do
 
   def send(data) do
     :poolboy.transaction(__MODULE__, fn client ->
-      AwsExRay.Client.send(client, data)
+      AwsExRay.Client.UDPClient.send(client, data)
     end)
   end
 
@@ -17,35 +17,28 @@ defmodule AwsExRay.ClientPool do
   end
 
   def init(_args) do
-
     children = [:poolboy.child_spec(
       @pool_name,
       pool_options(),
       client_options()
     )]
-
     Supervisor.init(children, strategy: :one_for_one)
-
   end
 
   def client_options() do
-
     [
       address: Config.daemon_address,
       port:    Config.daemon_port
     ]
-
   end
 
   def pool_options() do
-
     [
       {:name, {:local, @pool_name}} ,
-      {:worker_module, AwsExRay.Client},
+      {:worker_module, AwsExRay.UDPClient},
       {:size, Config.client_pool_size},
       {:max_overflow, Config.client_pool_overflow}
     ]
-
   end
 
 
