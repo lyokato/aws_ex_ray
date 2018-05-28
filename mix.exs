@@ -19,9 +19,10 @@ defmodule AwsExRay.MixProject do
 
   defp deps do
     [
-      {:secure_random, "~> 0.5"},
+      {:plug, "~> 1.5"},
       {:poison, "~> 3.1"},
       {:poolboy, "~> 1.5"},
+      {:secure_random, "~> 0.5"}
     ]
   end
 end

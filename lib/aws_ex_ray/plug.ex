@@ -3,9 +3,9 @@ defmodule AwsExRay.Plug do
   alias AwsExRay.Context
   alias AwsExRay.Trace
 
-  def init(options), do: options
+  def init(opts), do: opts
 
-  def call(conn, opts) do
+  def call(conn, _opts) do
 
     ctx = get_trace_context(conn)
 

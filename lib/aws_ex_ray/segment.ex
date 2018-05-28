@@ -72,7 +72,7 @@
 
       # TODO embed error
 
-      m = %{
+      %{
         name:        seg.name,
         id:          seg.id,
         trace_id:    seg.trace_id,
