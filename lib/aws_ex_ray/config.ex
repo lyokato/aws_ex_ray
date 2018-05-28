@@ -1,0 +1,40 @@
+defmodule AwsExRay.Config do
+
+  @default_sampling_rate        0.1
+  @default_daemon_address       "127.0.0.1"
+  @default_daemon_port          2000
+  @default_client_pool_size     5
+  @default_client_pool_overflow 0
+
+  def get(key, default) do
+    Application.get_env(:awx_ex_ray, key, default)
+  end
+
+  def sampling_rate() do
+    get(:sampling_rate,
+        @default_sampling_rate)
+  end
+
+  def daemon_address() do
+    address = get(:daemon_address,
+                  @default_daemon_address)
+    {:ok, ip_address} = :inet.parse_address(address)
+    ip_address
+  end
+
+  def daemon_port() do
+    get(:daemon_port,
+        @default_daemon_port)
+  end
+
+  def client_pool_size() do
+    get(:client_pool_size,
+        @default_client_pool_size)
+  end
+
+  def client_pool_overflow() do
+    get(:client_pool_overflow,
+        @default_client_pool_overflow)
+  end
+
+end
