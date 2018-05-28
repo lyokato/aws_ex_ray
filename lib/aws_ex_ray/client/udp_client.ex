@@ -102,7 +102,7 @@ defmodule AwsExRay.Client.UDPClient do
   end
 
   defp pack_data(data) do
-    (@header <> data)
+    (@header <> data <> "\n")
     |> String.to_charlist
     |> :erlang.term_to_binary
   end
