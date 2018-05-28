@@ -9,7 +9,7 @@ defmodule AwsExRay.Client do
   running on localhost.
   """
 
-  @daemon_version "1.2.3"
+  #@daemon_version "1.2.3"
 
   @max_retry 10
 
@@ -50,7 +50,7 @@ defmodule AwsExRay.Client do
 
   end
 
-  def handle_info({:EXIT, pid, reason}, state) do
+  def handle_info({:EXIT, _pid, _reason}, state) do
     {:stop, :normal, state}
   end
 
@@ -64,7 +64,7 @@ defmodule AwsExRay.Client do
     end
   end
 
-  def terminate(reason, state) do
+  def terminate(_reason, state) do
     :gen_udp.close(state.socket)
     :ok
   end
@@ -97,7 +97,7 @@ defmodule AwsExRay.Client do
       state.socket,
       state.address,
       state.port,
-      pack_data(data),
+      pack_data(data)
     )
   end
 

@@ -11,11 +11,12 @@ defmodule AwsExRay.ClientPool do
     end)
   end
 
+  def start_link(_args), do: start_link()
   def start_link() do
     Supervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def init(args) do
+  def init(_args) do
 
     children = [:poolboy.child_spec(
       @pool_name,
@@ -41,7 +42,7 @@ defmodule AwsExRay.ClientPool do
     [
       {:name, {:local, @pool_name}} ,
       {:worker_module, AwsExRay.Client},
-      {:size, Config.client_pool_size}
+      {:size, Config.client_pool_size},
       {:max_overflow, Config.client_pool_overflow}
     ]
 

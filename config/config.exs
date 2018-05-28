@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :awx_ex_ray, key: :value
+#     config :aws_ex_ray, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:awx_ex_ray, :key)
+#     Application.get_env(:aws_ex_ray, :key)
 #
 # You can also configure a 3rd-party app:
 #

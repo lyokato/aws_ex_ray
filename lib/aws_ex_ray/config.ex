@@ -7,7 +7,7 @@ defmodule AwsExRay.Config do
   @default_client_pool_overflow 0
 
   def get(key, default) do
-    Application.get_env(:awx_ex_ray, key, default)
+    Application.get_env(:aws_ex_ray, key, default)
   end
 
   def sampling_rate() do
