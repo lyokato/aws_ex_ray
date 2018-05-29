@@ -19,7 +19,11 @@
     end
 
     def finish(seg) do
-      put_in(seg.segment.end_time, Util.now())
+      if finished?(seg) do
+        seg
+      else
+        put_in(seg.segment.end_time, Util.now())
+      end
     end
 
     def to_json(seg), do: Formatter.to_json(seg)

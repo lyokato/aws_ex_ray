@@ -16,7 +16,7 @@
 
     def build(name, trace_id, parent_id) do
       %__MODULE__{
-        id:         generate_id(),
+        id:         Util.generate_model_id(),
         name:       name,
         version:    Config.service_version(),
         trace_id:   trace_id,
@@ -37,16 +37,16 @@
       }
     end
 
-    defp generate_id() do
-      SecureRandom.hex(8)
-    end
-
     def finished?(seg) do
       seg.end_time > 0
     end
 
     def finish(seg) do
-      %{seg|end_time: Util.now()}
+      if finished?(seg) do
+        seg
+      else
+        %{seg|end_time: Util.now()}
+      end
     end
 
     def to_json(seg), do: Formatter.to_json(seg)

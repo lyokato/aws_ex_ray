@@ -3,27 +3,53 @@ defmodule AwsExRay.Plug do
   import Plug.Conn
 
   alias AwsExRay.Context
+  alias AwsExRay.Plug.Paths
   alias AwsExRay.Trace
 
-  def init(opts), do: opts
+  @type http_method :: :get | :post | :put | :delete
 
-  def call(conn, _opts) do
+  @type t :: %__MODULE__{
+    name: String.t,
+    skip: [{http_method, String.t}]
+  }
 
-    ctx = get_trace_context(conn)
+  def init(opts \\ []) do
 
-    Process.put(:__aws_ex_ray__, ctx)
+    name = Keyword.fetch!(opts, :name)
+    skip = Keyword.get(opts, :skip, [])
 
-    seg = Context.start_segment(ctx, "plug")
+    %__MODULE__{
+      name: name,
+      skip: skip
+    }
 
-    register_before_send(conn, fn conn ->
+  end
 
-      Context.finish_segment(ctx, seg)
-      Process.put(:__aws_ex_ray__, nil)
+  def call(conn, opts) do
 
-      conn
+    if !can_skip_tracing(conn, opts) do
 
-    end)
+      ctx = get_trace_context(conn)
 
+      Process.put(:__aws_ex_ray__, ctx)
+
+      seg = Context.start_segment(ctx, opts.name)
+
+      register_before_send(conn, fn conn ->
+
+        Context.finish_segment(ctx, seg)
+        Process.put(:__aws_ex_ray__, nil)
+
+        conn
+
+      end)
+
+    end
+
+  end
+
+  defp can_skip_tracing(conn, opts) do
+    Paths.include(opts.skip, conn)
   end
 
   defp get_trace_context(conn) do

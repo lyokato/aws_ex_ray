@@ -36,7 +36,7 @@ defmodule AwsExRay.Client.UDPClientSupervisor do
 
   def pool_options() do
     [
-      {:name, {:local, @pool_name}} ,
+      {:name, {:local, @pool_name}},
       {:worker_module, UDPClient},
       {:size, Config.client_pool_size},
       {:max_overflow, Config.client_pool_overflow}

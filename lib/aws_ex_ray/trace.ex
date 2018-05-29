@@ -1,6 +1,7 @@
 defmodule AwsExRay.Trace do
 
   alias AwsExRay.Config
+  alias AwsExRay.Util
 
   defstruct root:     "",
             sampled:  true,
@@ -9,7 +10,7 @@ defmodule AwsExRay.Trace do
   @spec new() :: %__MODULE__{}
   def new() do
     %__MODULE__{
-      root:    generate_trace_id(),
+      root:    Util.generate_trace_id(),
       sampled: sample?(),
       parent:  "",
     }
@@ -26,11 +27,6 @@ defmodule AwsExRay.Trace do
       sampled:  sampled,
       parent:   parent
     }
-  end
-
-  defp generate_trace_id() do
-    t = System.system_time(:seconds) |> Integer.to_string(16)
-    "1-#{t}-#{SecureRandom.hex(12)}"
   end
 
   defp sample?() do
