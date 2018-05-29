@@ -10,7 +10,11 @@ defmodule AwsExRay.Context do
   end
 
   def start_segment(ctx, name) do
-    Segment.build(name, ctx.trace.root)
+    Segment.build(
+      name,
+      ctx.trace.root,
+      ctx.trace.parent
+    )
   end
 
   def finish_segment(ctx, seg) do

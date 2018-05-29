@@ -12,9 +12,6 @@
               start_time: 0,
               end_time:   0
 
-    def build(name, trace_id) do
-      build(name, trace_id, "")
-    end
     def build(name, trace_id, parent_id) do
       %__MODULE__{
         id:         generate_id(),
@@ -23,7 +20,7 @@
         trace_id:   trace_id,
         parent_id:  parent_id,
         start_time: now(),
-        end_time: 0,
+        end_time:   0,
         #annotation: %{
         #  hostname: "",
         #}
