@@ -23,6 +23,7 @@ defmodule AwsExRay.Plug do
       conn
 
     end)
+
   end
 
   defp get_trace_context(conn) do

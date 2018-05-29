@@ -1,16 +1,18 @@
   defmodule AwsExRay.Segment do
 
     alias AwsExRay.Config
+    alias AwsExRay.Segment.Formatter
+    alias AwsExRay.Util
 
-    defstruct name:       "",
-              id:         "",
-              trace_id:   "",
+    defstruct id:         "",
+              name:       "",
               version:    "",
+              trace_id:   "",
               parent_id:  "",
-              annotation: %{},
-              metadata:   %{},
               start_time: 0,
-              end_time:   0
+              end_time:   0,
+              annotation: %{},
+              metadata:   %{}
 
     def build(name, trace_id, parent_id) do
       %__MODULE__{
@@ -19,11 +21,13 @@
         version:    Config.service_version(),
         trace_id:   trace_id,
         parent_id:  parent_id,
-        start_time: now(),
+        # TODO start_time, end_timeを固定値でも作れるようにする
+        start_time: Util.now(),
         end_time:   0,
-        #annotation: %{
-        #  hostname: "",
-        #}
+        annotation: %{
+          # TODO how to set hostname? by AWS-CLI API?
+          hostname: "",
+        },
         metadata: %{
           tracing_sdk: %{
             name:    Config.library_name,
@@ -31,10 +35,6 @@
           }
         }
       }
-    end
-
-    defp now() do
-      System.system_time(:micro_seconds) / 1_000_000
     end
 
     defp generate_id() do
@@ -46,40 +46,9 @@
     end
 
     def finish(seg) do
-      %{seg|end_time: now()}
+      %{seg|end_time: Util.now()}
     end
 
-    def to_json(seg) do
-
-      embed_version = fn m ->
-        if seg.version != "" do
-          put_in(m.service.version, seg.version)
-        else
-          m
-        end
-      end
-
-      embed_progress = fn m ->
-        if finished?(seg) do
-          put_in(m.in_progress, true)
-        else
-          put_in(m.end_time, seg.end_time)
-        end
-      end
-
-      # TODO embed error
-
-      %{
-        name:        seg.name,
-        id:          seg.id,
-        trace_id:    seg.trace_id,
-        start_time:  seg.start_time,
-        #annotations: seg.annotations,
-        metadata:    seg.metadata
-      }
-      |> embed_version.()
-      |> embed_progress.()
-      |> Poison.encode!()
-    end
+    def to_json(seg), do: Formatter.to_json(seg)
 
   end

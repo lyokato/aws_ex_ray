@@ -15,6 +15,11 @@ defmodule AwsExRay.Trace do
     }
   end
 
+  @spec with_params(
+    trace_id :: String.t,
+    sampled  :: boolean,
+    parent   :: String.t
+  ) :: %__MODULE__{}
   def with_params(trace_id, sampled, parent) do
     %__MODULE__{
       root:     trace_id,
