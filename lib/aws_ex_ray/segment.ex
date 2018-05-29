@@ -7,20 +7,18 @@
     defstruct id:         "",
               name:       "",
               version:    "",
-              trace_id:   "",
-              parent_id:  "",
+              trace:      nil,
               start_time: 0,
               end_time:   0,
               annotation: %{},
               metadata:   %{}
 
-    def build(name, trace_id, parent_id) do
+    def new(trace, name) do
       %__MODULE__{
         id:         Util.generate_model_id(),
         name:       name,
         version:    Config.service_version(),
-        trace_id:   trace_id,
-        parent_id:  parent_id,
+        trace:      trace,
         # TODO start_time, end_timeを固定値でも作れるようにする
         start_time: Util.now(),
         end_time:   0,

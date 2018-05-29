@@ -10,13 +10,22 @@
       %{
         name:        seg.name,
         id:          seg.id,
-        trace_id:    seg.trace_id,
+        trace_id:    seg.trace.root,
         start_time:  seg.start_time,
         #annotations: seg.annotations,
         metadata:    seg.metadata
       }
       |> embed_version(seg)
       |> embed_progress(seg)
+      |> embed_parent(seg)
+    end
+
+    defp embed_parent(m, seg) do
+      if seg.trace.parent != "" do
+        put_in(m.parent_id, seg.trace.parent)
+      else
+        m
+      end
     end
 
     defp embed_version(m, seg) do

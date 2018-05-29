@@ -4,6 +4,8 @@ defmodule AwsExRay.Application do
 
   def start(_type, _args) do
 
+    AwsExRay.Store.init()
+
     children = [
       {AwsExRay.Client, []}
     ]

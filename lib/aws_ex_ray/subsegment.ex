@@ -7,9 +7,9 @@
     defstruct segment: nil,
               remote:  false
 
-    def build(name, trace_id, parent_id, remote) do
+    def new(trace, name, remote) do
       %__MODULE__{
-        segment: Segment.build(name, trace_id, parent_id),
+        segment: Segment.new(trace, name),
         remote:  remote
       }
     end
