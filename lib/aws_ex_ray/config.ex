@@ -25,10 +25,15 @@ defmodule AwsExRay.Config do
   end
 
   def daemon_address() do
+
     address = get(:daemon_address,
                   @default_daemon_address)
-    {:ok, ip_address} = :inet.parse_address(address)
+
+    {:ok, ip_address} =
+      address |> String.to_charlist() |> :inet.parse_address()
+
     ip_address
+
   end
 
   def daemon_port() do
