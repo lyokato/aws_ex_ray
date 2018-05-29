@@ -47,6 +47,10 @@
       }
     end
 
+    def sampled?(seg) do
+      seg.trace.sampled
+    end
+
     def finished?(seg) do
       seg.end_time > 0
     end

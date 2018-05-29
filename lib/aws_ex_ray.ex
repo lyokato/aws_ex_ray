@@ -24,10 +24,16 @@ defmodule AwsExRay do
 
   def finish_tracing(segment) do
 
-    segment
-    |> Segment.finish()
-    |> Segment.to_json()
-    |> Client.send()
+    segment = segment
+           |> Segment.finish()
+
+    if Segment.sampled?(segment) do
+
+      segment
+      |> Segment.to_json()
+      |> Client.send()
+
+    end
 
     Store.delete()
 
@@ -62,10 +68,16 @@ defmodule AwsExRay do
 
   def finish_subsegment(subsegment) do
 
-    subsegment
-    |> Subsegment.finish()
-    |> Subsegment.to_json()
-    |> Client.send()
+    subsegment = subsegment
+               |> Subsegment.finish()
+
+    if Subsegment.sampled?(subsegment) do
+
+      subsegment
+      |> Subsegment.to_json()
+      |> Client.send()
+
+    end
 
   end
 

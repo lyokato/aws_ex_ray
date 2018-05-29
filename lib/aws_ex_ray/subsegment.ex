@@ -19,6 +19,10 @@
       }
     end
 
+    def sampled?(seg) do
+      Segment.sampled?(seg.segment)
+    end
+
     def finished?(seg) do
       seg.segment.end_time > 0
     end
