@@ -3,6 +3,12 @@ defmodule AwsExRay.Trace do
   alias AwsExRay.Config
   alias AwsExRay.Util
 
+  @type t :: %__MODULE__{
+    root:    String.t,
+    sampled: boolean,
+    parent:  String.t
+  }
+
   defstruct root:     "",
             sampled:  true,
             parent:   ""

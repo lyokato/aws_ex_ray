@@ -2,7 +2,19 @@
 
     alias AwsExRay.Config
     alias AwsExRay.Segment.Formatter
+    alias AwsExRay.Trace
     alias AwsExRay.Util
+
+    @type t :: %__MODULE__{
+      id:         String.t,
+      name:       String.t,
+      version:    String.t,
+      trace:      Trace.t,
+      start_time: number,
+      end_time:   number,
+      annotation: map,
+      metadata:   map
+    }
 
     defstruct id:         "",
               name:       "",

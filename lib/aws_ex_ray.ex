@@ -20,6 +20,8 @@ defmodule AwsExRay do
 
   end
 
+  @spec finish_tracing(segment :: Sugment.t) :: :ok
+
   def finish_tracing(segment) do
 
     segment

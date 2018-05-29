@@ -4,6 +4,11 @@
     alias AwsExRay.Subsegment.Formatter
     alias AwsExRay.Util
 
+    @type t :: %__MODULE__{
+      segment: Segment.t,
+      remote:  boolean
+    }
+
     defstruct segment: nil,
               remote:  false
 
