@@ -10,7 +10,13 @@ defmodule AwsExRay.Trace.Formatter do
       parent  = Map.get(m, "parent", "")
       sampled = Map.get(m, "sampled", "0") == "1"
 
-      {:ok, AwsExRay.Trace.with_params(root, sampled, parent)}
+      trace = AwsExRay.Trace.with_params(
+        root,
+        sampled,
+        parent
+      )
+
+      {:ok, trace}
 
     else
 

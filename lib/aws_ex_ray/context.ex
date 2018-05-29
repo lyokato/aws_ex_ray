@@ -5,18 +5,16 @@ defmodule AwsExRay.Context do
 
   defstruct trace: nil
 
+  def new(trace) do
+    %__MODULE__{trace: trace}
+  end
+
   def start_segment(ctx, name) do
-    seg = Segment.build(name, ctx.trace_id)
-    try do
+    Segment.build(name, ctx.trace.root)
+  end
 
-    rescue
-      err -> raise(err)
-    after
-      seg
-      |> Segment.to_json()
-      |> Client.send()
-    end
-
+  def finish_segment(ctx, seg) do
+    Segment.to_json(seg) |> Client.send()
   end
 
 end
