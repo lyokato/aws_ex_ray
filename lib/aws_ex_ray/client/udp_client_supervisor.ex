@@ -1,13 +1,15 @@
 defmodule AwsExRay.Client.UDPClientSupervisor do
 
   use Supervisor
+
   alias AwsExRay.Config
+  alias AwsExRay.Client.UDPClient
 
   @pool_name :aws_ex_ray_client_pool
 
   def send(data) do
     :poolboy.transaction(__MODULE__, fn client ->
-      AwsExRay.Client.UDPClient.send(client, data)
+      UDPClient.send(client, data)
     end)
   end
 
@@ -35,7 +37,7 @@ defmodule AwsExRay.Client.UDPClientSupervisor do
   def pool_options() do
     [
       {:name, {:local, @pool_name}} ,
-      {:worker_module, AwsExRay.UDPClient},
+      {:worker_module, UDPClient},
       {:size, Config.client_pool_size},
       {:max_overflow, Config.client_pool_overflow}
     ]

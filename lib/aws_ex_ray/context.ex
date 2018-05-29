@@ -17,7 +17,7 @@ defmodule AwsExRay.Context do
     )
   end
 
-  def finish_segment(seg) do
+  def finish_segment(_ctx, seg) do
     Segment.finish(seg)
     |> Segment.to_json()
     |> Client.send()

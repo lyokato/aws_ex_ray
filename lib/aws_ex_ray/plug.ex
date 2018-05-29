@@ -33,9 +33,9 @@ defmodule AwsExRay.Plug do
   defp find_trace(conn) do
     with {:ok, value} <- find_trace_header(conn),
          {:ok, trace} <- Trace.Formatter.parse_http_header(value) do
-      {:ok, trace}
+      trace
     else
-      {:error, :not_found} -> {:ok, Trace.new()}
+      {:error, :not_found} -> Trace.new()
     end
   end
 
