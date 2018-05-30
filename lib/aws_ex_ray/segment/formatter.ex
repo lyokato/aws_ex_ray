@@ -38,9 +38,9 @@
 
     defp embed_progress(m, seg) do
       if Segment.finished?(seg) do
-        Map.put(m, "in_progress", true)
-      else
         Map.put(m, "end_time", seg.end_time)
+      else
+        Map.put(m, "in_progress", true)
       end
     end
 

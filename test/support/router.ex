@@ -4,6 +4,9 @@ defmodule AwsExRay.Test.Router do
 
   plug AwsExRay.Plug, name: "my-xray", skip: [{:get, "/bar"}]
 
+  plug :match
+  plug :dispatch
+
   get "/foo" do
 
     conn

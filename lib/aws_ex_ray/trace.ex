@@ -36,7 +36,7 @@ defmodule AwsExRay.Trace do
   end
 
   defp sample?() do
-    :rand.uniform() > Config.sampling_rate
+    :rand.uniform() <= Config.sampling_rate
   end
 
 end

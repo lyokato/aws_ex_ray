@@ -5,7 +5,9 @@
     end
 
     def generate_trace_id() do
-      t = System.system_time(:seconds) |> Integer.to_string(16)
+      t = System.system_time(:seconds)
+          |> Integer.to_string(16)
+          |> String.downcase()
       "1-#{t}-#{SecureRandom.hex(12)}"
     end
 
