@@ -13,7 +13,8 @@
       start_time: number,
       end_time:   number,
       annotation: map,
-      metadata:   map
+      metadata:   map,
+      http:       map
     }
 
     defstruct id:         "",
@@ -23,7 +24,8 @@
               start_time: 0,
               end_time:   0,
               annotation: %{},
-              metadata:   %{}
+              metadata:   %{},
+              http: %{}
 
     def new(trace, name) do
       %__MODULE__{
@@ -43,8 +45,20 @@
             name:    Config.library_name,
             version: Config.library_version,
           }
+        },
+        http: %{
+          request: nil,
+          response: nil
         }
       }
+    end
+
+    def set_http_request(seg, req) do
+      put_in(seg.http.request, req)
+    end
+
+    def set_http_response(seg, res) do
+      put_in(seg.http.response, res)
     end
 
     def sampled?(seg) do

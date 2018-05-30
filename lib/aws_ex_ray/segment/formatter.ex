@@ -22,7 +22,7 @@
 
     defp embed_parent(m, seg) do
       if seg.trace.parent != "" do
-        put_in(m.parent_id, seg.trace.parent)
+        Map.put(m, "parent_id", seg.trace.parent)
       else
         m
       end
@@ -30,7 +30,7 @@
 
     defp embed_version(m, seg) do
       if seg.version != "" do
-        put_in(m.service.version, seg.version)
+        Map.put(m, "service", %{"version" => seg.version})
       else
         m
       end
@@ -38,9 +38,9 @@
 
     defp embed_progress(m, seg) do
       if Segment.finished?(seg) do
-        put_in(m.in_progress, true)
+        Map.put(m, "in_progress", true)
       else
-        put_in(m.end_time, seg.end_time)
+        Map.put(m, "end_time", seg.end_time)
       end
     end
 

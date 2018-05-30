@@ -42,28 +42,20 @@ defmodule AwsExRay do
   end
 
   def start_subsegment(name) do
-    start_subsegment(name, self())
+    start_subsegment(name, false)
   end
 
-  def start_subsegment(name, pid) do
-
-    # TODO
-    remote = false
-
-    case Store.lookup(pid) do
+  def start_subsegment(name, remote) do
+    case Store.lookup() do
 
       {:ok, trace, segment_id} ->
-        subsegment =
-          %{trace|parent: segment_id}
-          |> Subsegment.new(name, remote)
-        {:ok, subsegment}
+        %{trace|parent: segment_id}
+        |> Subsegment.new(name, remote)
 
       {:error, :not_found} ->
-        Logger.warn "<AwsExRay> subsegment couldn't be started. parent segment is not found on the process."
-        {:error, :not_found}
+        raise "<AwsExRay> subsegment couldn't be started. parent segment is not found on the process."
 
     end
-
   end
 
   def finish_subsegment(subsegment) do
@@ -79,6 +71,11 @@ defmodule AwsExRay do
 
     end
 
+  end
+
+  def current_context(), do: Store.lookup()
+  def keep_context({trace, segment_id}) do
+    Store.insert(trace, segment_id)
   end
 
 end

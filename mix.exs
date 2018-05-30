@@ -13,13 +13,14 @@ defmodule AwsExRay.MixProject do
 
   def application do
     [
-      applications: [:logger, :poolboy],
+      applications: [:logger, :poolboy, :httpoison],
       mod: {AwsExRay.Application, []}
     ]
   end
 
   defp deps do
     [
+      {:httpoison, "~> 1.1"},
       {:plug, "~> 1.5"},
       {:poison, "~> 3.1"},
       {:poolboy, "~> 1.5"},

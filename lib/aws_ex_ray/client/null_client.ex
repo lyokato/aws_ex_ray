@@ -1,4 +1,4 @@
-defmodule AwsExRay.NullClient do
+defmodule AwsExRay.Client.NullClient do
 
   use GenServer
 

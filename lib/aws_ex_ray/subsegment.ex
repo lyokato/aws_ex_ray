@@ -19,6 +19,18 @@
       }
     end
 
+    def get_trace(seg) do
+      seg.segment.trace
+    end
+
+    def set_http_request(seg, req) do
+      put_in(seg.segment.http.request, req)
+    end
+
+    def set_http_response(seg, res) do
+      put_in(seg.segment.http.response, res)
+    end
+
     def sampled?(seg) do
       Segment.sampled?(seg.segment)
     end
