@@ -14,7 +14,8 @@ defmodule AwsExRay do
 
     segment = Segment.new(trace, name)
 
-    Store.insert(trace, segment.id)
+    Store.Table.insert(trace, segment.id)
+    Store.MonitorSupervisor.start_monitoring(self())
 
     segment
 
@@ -35,8 +36,6 @@ defmodule AwsExRay do
 
     end
 
-    Store.delete()
-
     :ok
 
   end
@@ -46,7 +45,7 @@ defmodule AwsExRay do
   end
 
   def start_subsegment(name, remote) do
-    case Store.lookup() do
+    case Store.Table.lookup() do
 
       {:ok, trace, segment_id} ->
         %{trace|parent: segment_id}
@@ -73,9 +72,9 @@ defmodule AwsExRay do
 
   end
 
-  def current_context(), do: Store.lookup()
+  def current_context(), do: Store.Table.lookup()
   def keep_context({trace, segment_id}) do
-    Store.insert(trace, segment_id)
+    Store.Table.insert(trace, segment_id)
   end
 
 end

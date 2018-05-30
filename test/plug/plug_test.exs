@@ -1,6 +1,6 @@
 defmodule AwsExRay.Test.PlugTest do
 
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use Plug.Test
 
   alias AwsExRay.Test.Router

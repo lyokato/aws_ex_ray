@@ -1,10 +1,11 @@
 defmodule AwsExRay.Config do
 
-  @default_sampling_rate        0.1
-  @default_daemon_address       "127.0.0.1"
-  @default_daemon_port          2000
-  @default_client_pool_size     10
-  @default_client_pool_overflow 100
+  @default_sampling_rate           0.1
+  @default_daemon_address          "127.0.0.1"
+  @default_daemon_port             2000
+  @default_client_pool_size        10
+  @default_client_pool_overflow    100
+  @default_store_monitor_pool_size 10
   @default_client_module        AwsExRay.Client.UDPClientSupervisor
   @default_sandbox_sink_module  AwsExRay.Client.Sandbox.Sink.Ignore
 
@@ -40,6 +41,11 @@ defmodule AwsExRay.Config do
   def daemon_port() do
     get(:daemon_port,
         @default_daemon_port)
+  end
+
+  def store_monitor_pool_size() do
+    get(:store_monitor_pool_size,
+        @default_store_monitor_pool_size)
   end
 
   def client_pool_size() do

@@ -4,8 +4,11 @@ defmodule AwsExRay.Application do
 
   def start(_type, _args) do
 
+    AwsExRay.Store.Table.init()
+
     children = [
-      {AwsExRay.Client, []}
+      {AwsExRay.Client, []},
+      {AwsExRay.Store.MonitorSupervisor, []}
     ]
 
     opts = [

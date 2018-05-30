@@ -11,7 +11,7 @@ defmodule AwsExRay.Client.UDPClientSupervisor do
 
   @impl AwsExRay.Client.Behaviour
   def send(data) do
-    :poolboy.transaction(__MODULE__, fn client ->
+    :poolboy.transaction(@pool_name, fn client ->
       UDPClient.send(client, data)
     end)
   end
