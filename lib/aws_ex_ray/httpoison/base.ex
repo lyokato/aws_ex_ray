@@ -28,11 +28,10 @@ defmodule AwsExRay.HTTPoison.Base do
             request_record = %HTTPRequest{
               segment_type: :subsegment,
               method:       String.upcase(to_string(method)),
-              url:          url
+              url:          url,
+              traced:       Keyword.get(options, :traced, false),
+              user_agent:   get_user_agent(headers)
             }
-            # TODO put 'use_agent'
-            # TODO put 'traced' if needed
-            # USE ORIGINAL options
 
             subsegment =
               Subsegment.set_http_request(subsegment, request_record)
@@ -69,6 +68,13 @@ defmodule AwsExRay.HTTPoison.Base do
       defp start_subsegment(headers, url) do
         find_tracing_name(headers, url)
         |> AwsExRay.start_subsegment(remote: true)
+      end
+
+      defp get_user_agent(headers) do
+        case headers |> Enum.filter(fn({k, _}) -> String.downcase(k) == "user-agent" end) do
+          [] -> ""
+          [header|_] -> header |> elem(1)
+        end
       end
 
       defp get_response_content_length(headers) do

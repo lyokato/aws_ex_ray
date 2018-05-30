@@ -33,6 +33,9 @@ defmodule AwsExRay.Test.HTTPoisonTest do
     # TODO
     assert got == []
 
+    # TODO traced option
+    # TODO user-agenet header
+
   end
 
 end
