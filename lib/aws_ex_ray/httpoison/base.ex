@@ -7,9 +7,9 @@ defmodule AwsExRay.HTTPoison.Base do
       use HTTPoison.Base
 
       alias AwsExRay.Record.HTTPRequest
+      alias AwsExRay.Record.HTTPResponse
       alias AwsExRay.Subsegment
       alias AwsExRay.Trace
-      #alias AwsExRay.Record.HTTPResponse
 
       #defoverridable [
       #  request: 5
@@ -36,12 +36,32 @@ defmodule AwsExRay.HTTPoison.Base do
         headers = put_tracing_header(headers, subsegment)
         result = super(method, url, body, headers, options)
 
-        # TODO put HTTPResponse into subsegment?
+        subsegment = case result do
+
+          {:ok, %HTTPoison.Response{status_code: code, headers: headers}} ->
+            res = HTTPResponse.new(code, get_response_content_length(headers))
+            Subsegment.set_http_response(subsegment, res)
+
+          {:error, error} ->
+            # TODO
+            subsegment
+
+        end
+
+        require Logger
+        Logger.warn "HTTP: #{inspect result}"
 
         AwsExRay.finish_subsegment(subsegment)
 
         result
 
+      end
+
+      defp get_response_content_length(headers) do
+        case headers |> Enum.filter(fn({k, _}) -> String.downcase(k) == "content-length" end) do
+          [] -> 0
+          [header|_] -> header |> elem(1) |> String.to_integer()
+        end
       end
 
       defp put_tracing_header(headers, subsegment) do
