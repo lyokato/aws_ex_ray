@@ -98,11 +98,9 @@ defmodule AwsExRay.Plug do
   end
 
   defp find_trace_header(conn) do
-    headers = get_req_header(conn, "x-amzn-trace-id")
-    if length(headers) > 0 do
-      {:ok, List.first(headers)}
-    else
-      {:error, :not_found}
+    case get_req_header(conn, "x-amzn-trace-id") do
+      []        -> {:error, :not_found}
+      [value|_] -> {:ok, value}
     end
   end
 

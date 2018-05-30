@@ -13,7 +13,6 @@
 
       # TODO
       # sql
-      # http.request.traced
     end
 
     defp embed_remote(m, seg) do
