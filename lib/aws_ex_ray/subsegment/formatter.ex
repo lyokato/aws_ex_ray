@@ -1,5 +1,7 @@
   defmodule AwsExRay.Subsegment.Formatter do
 
+    alias AwsExRay.Record.SQL
+
     def to_json(seg) do
       to_map(seg) |> Poison.encode!()
     end
@@ -10,9 +12,16 @@
 
       Map.put(m, :type, "subsegment")
       |> embed_remote(seg)
+      |> embed_sql(seg)
 
-      # TODO
-      # sql
+    end
+
+    defp embed_sql(m, seg) do
+      if seg.sql != nil do
+        Map.put(m, :sql, SQL.to_map(seg.sql))
+      else
+        m
+      end
     end
 
     defp embed_remote(m, seg) do

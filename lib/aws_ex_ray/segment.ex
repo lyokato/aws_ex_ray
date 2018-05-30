@@ -33,7 +33,6 @@
         name:       name,
         version:    Config.service_version(),
         trace:      trace,
-        # TODO start_time, end_timeを固定値でも作れるようにする
         start_time: Util.now(),
         end_time:   0,
         annotation: %{

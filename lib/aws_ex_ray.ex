@@ -7,6 +7,7 @@ defmodule AwsExRay do
   alias AwsExRay.Store
   alias AwsExRay.Subsegment
   alias AwsExRay.Trace
+  alias AwsExRay.Util
 
   @spec start_tracing(trace :: Trace.t, name :: String.t) :: Segment.t
 
@@ -40,27 +41,28 @@ defmodule AwsExRay do
 
   end
 
-  def start_subsegment(name) do
-    start_subsegment(name, false)
-  end
+  def start_subsegment(name, opts \\ []) do
 
-  def start_subsegment(name, remote) do
-    case Store.Table.lookup() do
+    remote = Keyword.get(opts, :remote, false)
+    pid    = Keyword.get(opts, :tracing_pid, self())
+
+    case Store.Table.lookup(pid) do
 
       {:ok, trace, segment_id} ->
-        %{trace|parent: segment_id}
-        |> Subsegment.new(name, remote)
+        subsegment = %{trace|parent: segment_id}
+                   |> Subsegment.new(name, remote)
+        {:ok, subsegment}
 
       {:error, :not_found} ->
-        raise "<AwsExRay> subsegment couldn't be started. tracing context is not found on this process."
+        {:error, :out_of_xray_context}
 
     end
   end
 
-  def finish_subsegment(subsegment) do
+  def finish_subsegment(subsegment, end_time \\ Util.now()) do
 
     subsegment = subsegment
-               |> Subsegment.finish()
+                 |> Subsegment.finish(end_time)
 
     if Subsegment.sampled?(subsegment) do
 

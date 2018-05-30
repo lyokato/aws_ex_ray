@@ -14,47 +14,61 @@ defmodule AwsExRay.HTTPoison.Base do
       #defoverridable [
       #  request: 5
       #]
-
+      #
       def request(method, url, body \\ "", headers \\ [], options \\ []) do
 
-        request_record = %HTTPRequest{
-          segment_type: :subsegment,
-          method:       String.upcase(to_string(method)),
-          url:          url
-        }
+        case start_subsegment(headers, url) do
 
-        # TODO put 'use_agent'
+          {:error, :out_of_xray_context} ->
 
-        # TODO put 'traced' if needed
-        # USE ORIGINAL options
+            super(method, url, body, headers, options)
 
-        subsegment = find_tracing_name(headers, url)
-                   |> AwsExRay.start_subsegment(true)
-                   |> Subsegment.set_http_request(request_record)
+          {:ok, subsegment} ->
+
+            request_record = %HTTPRequest{
+              segment_type: :subsegment,
+              method:       String.upcase(to_string(method)),
+              url:          url
+            }
+            # TODO put 'use_agent'
+            # TODO put 'traced' if needed
+            # USE ORIGINAL options
+
+            subsegment =
+              Subsegment.set_http_request(subsegment, request_record)
+
+            headers = put_tracing_header(headers, subsegment)
+
+            result = super(method, url, body, headers, options)
+
+            subsegment
+            |> put_response_record_if_needed(result)
+            |> AwsExRay.finish_subsegment()
+
+            result
 
 
-        headers = put_tracing_header(headers, subsegment)
-        result = super(method, url, body, headers, options)
+        end
 
-        subsegment = case result do
+      end
+
+      defp put_response_record_if_needed(subsegment, http_response) do
+        case http_response do
 
           {:ok, %HTTPoison.Response{status_code: code, headers: headers}} ->
             res = HTTPResponse.new(code, get_response_content_length(headers))
             Subsegment.set_http_response(subsegment, res)
 
           {:error, error} ->
-            # TODO
+            # TODO stuff error into subsegment
             subsegment
 
         end
+      end
 
-        require Logger
-        Logger.warn "HTTP: #{inspect result}"
-
-        AwsExRay.finish_subsegment(subsegment)
-
-        result
-
+      defp start_subsegment(headers, url) do
+        find_tracing_name(headers, url)
+        |> AwsExRay.start_subsegment(remote: true)
       end
 
       defp get_response_content_length(headers) do

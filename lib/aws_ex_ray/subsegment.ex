@@ -1,26 +1,38 @@
   defmodule AwsExRay.Subsegment do
 
+    alias AwsExRay.Record.SQL
     alias AwsExRay.Segment
     alias AwsExRay.Subsegment.Formatter
     alias AwsExRay.Util
 
     @type t :: %__MODULE__{
       segment: Segment.t,
-      remote:  boolean
+      remote:  boolean,
+      sql:     SQL.t,
     }
 
     defstruct segment: nil,
-              remote:  false
+              remote:  false,
+              sql:     nil
 
     def new(trace, name, remote) do
       %__MODULE__{
         segment: Segment.new(trace, name),
-        remote:  remote
+        remote:  remote,
+        sql:     nil
       }
+    end
+
+    def set_start_time(seg, start_time) do
+      put_in(seg.segment.start_time, start_time)
     end
 
     def get_trace(seg) do
       seg.segment.trace
+    end
+
+    def set_sql(seg, sql) do
+      Map.put(seg, :sql, sql)
     end
 
     def set_http_request(seg, req) do
@@ -40,10 +52,14 @@
     end
 
     def finish(seg) do
+      finish(seg, Util.now())
+    end
+
+    def finish(seg, end_time) do
       if finished?(seg) do
         seg
       else
-        put_in(seg.segment.end_time, Util.now())
+        put_in(seg.segment.end_time, end_time)
       end
     end
 
