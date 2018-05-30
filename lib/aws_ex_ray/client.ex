@@ -1,5 +1,9 @@
 defmodule AwsExRay.Client do
 
+  defmodule Behaviour do
+    @callback send(data :: binary) :: term
+  end
+
   alias AwsExRay.Config
 
   def child_spec(opts) do

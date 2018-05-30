@@ -53,7 +53,7 @@ defmodule AwsExRay do
         |> Subsegment.new(name, remote)
 
       {:error, :not_found} ->
-        raise "<AwsExRay> subsegment couldn't be started. parent segment is not found on the process."
+        raise "<AwsExRay> subsegment couldn't be started. tracing context is not found on this process."
 
     end
   end

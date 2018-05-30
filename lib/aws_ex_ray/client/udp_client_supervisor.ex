@@ -2,11 +2,14 @@ defmodule AwsExRay.Client.UDPClientSupervisor do
 
   use Supervisor
 
+  @behaviour AwsExRay.Client.Behaviour
+
   alias AwsExRay.Config
   alias AwsExRay.Client.UDPClient
 
   @pool_name :aws_ex_ray_client_pool
 
+  @impl AwsExRay.Client.Behaviour
   def send(data) do
     :poolboy.transaction(__MODULE__, fn client ->
       UDPClient.send(client, data)
@@ -18,6 +21,7 @@ defmodule AwsExRay.Client.UDPClientSupervisor do
     Supervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
+  @impl Supervisor
   def init(_args) do
     children = [:poolboy.child_spec(
       @pool_name,
