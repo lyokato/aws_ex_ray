@@ -3,9 +3,10 @@ defmodule AwsExRay.Config do
   @default_sampling_rate        0.1
   @default_daemon_address       "127.0.0.1"
   @default_daemon_port          2000
-  @default_client_pool_size     5
-  @default_client_pool_overflow 0
+  @default_client_pool_size     10
+  @default_client_pool_overflow 100
   @default_client_module        AwsExRay.Client.UDPClientSupervisor
+  @default_sandbox_sink_module  AwsExRay.Client.Sandbox.Sink.Ignore
 
   def library_name() do
     "aws-ex-ray"
@@ -54,6 +55,11 @@ defmodule AwsExRay.Config do
   def client_module() do
     get(:client_module,
         @default_client_module)
+  end
+
+  def sandbox_sink_module() do
+    get(:sandbox_sink_module,
+        @default_sandbox_sink_module)
   end
 
   def service_version() do

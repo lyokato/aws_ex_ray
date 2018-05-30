@@ -2,7 +2,10 @@ defmodule AwsExRay.Client.Sandbox do
 
   use GenServer
 
-  def send(_data) do
+  @sink_mod AwsExRay.Config.sandbox_sink_module
+
+  def send(data) do
+    @sink_mod.send(data)
   end
 
   def start_link(opts) do

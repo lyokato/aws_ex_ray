@@ -1,12 +1,12 @@
-#Mox.defmock(AwsExRay.Client.Sandbox, for: AwsExRay.Client.Behaviour)
-#
+Mox.defmock(AwsExRay.Client.Sandbox.Sink.Stub, for: AwsExRay.Client.Sandbox.Sink.Behaviour)
+
 defmodule AwsExRay.Test.Mox do
+
   import Mox
 
   def setup_default() do
-    #AwsExRay.Clinet.Sandbox |> stub(:send, fn _data ->
-    #  :ok
-    #end)
+    alias AwsExRay.Client.Sandbox.Sink
+    Sink.Stub |> stub(:send, &Sink.Ignore.send/1)
   end
 
 end

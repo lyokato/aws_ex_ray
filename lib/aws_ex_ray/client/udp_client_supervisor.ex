@@ -2,10 +2,10 @@ defmodule AwsExRay.Client.UDPClientSupervisor do
 
   use Supervisor
 
-  @behaviour AwsExRay.Client.Behaviour
-
   alias AwsExRay.Config
   alias AwsExRay.Client.UDPClient
+
+  @behaviour AwsExRay.Client.Behaviour
 
   @pool_name :aws_ex_ray_client_pool
 
