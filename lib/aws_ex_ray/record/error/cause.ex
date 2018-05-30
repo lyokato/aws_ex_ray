@@ -1,4 +1,4 @@
-defmodule AwsExRay.Model.Error.Cause do
+defmodule AwsExRay.Record.Error.Cause do
 
   defstruct id: "",
             working_directory: "./",

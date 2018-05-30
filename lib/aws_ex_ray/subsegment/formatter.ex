@@ -8,7 +8,7 @@
 
       m = AwsExRay.Segment.Formatter.to_map(seg.segment)
 
-      Map.put(m, "type", "subsegment")
+      Map.put(m, :type, "subsegment")
       |> embed_remote(seg)
 
       # TODO
@@ -18,7 +18,7 @@
 
     defp embed_remote(m, seg) do
       if seg.remote do
-        Map.put(m, "namespace", "remote")
+        Map.put(m, :namespace, "remote")
       else
         m
       end

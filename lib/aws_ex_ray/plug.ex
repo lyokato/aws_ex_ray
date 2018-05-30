@@ -3,6 +3,9 @@ defmodule AwsExRay.Plug do
   import Plug.Conn
 
   alias AwsExRay.Plug.Paths
+  alias AwsExRay.Record.HTTPRequest
+  alias AwsExRay.Record.HTTPResponse
+  alias AwsExRay.Segment
   alias AwsExRay.Trace
 
   @type http_method :: :get | :post | :put | :delete
@@ -32,9 +35,30 @@ defmodule AwsExRay.Plug do
 
       trace = get_trace(conn)
 
+      request_record = %HTTPRequest{
+        segment_type: :segment,
+        method:       conn.method,
+        url:          request_url(conn),
+        user_agent:   get_user_agent(conn),
+      }
+      # TODO
+      #  client_ip,
+      #  x_forwarded_for
+
       segment = AwsExRay.start_tracing(trace, opts.name)
+              |> Segment.set_http_request(request_record)
 
       register_before_send(conn, fn conn ->
+
+        content_length = get_response_content_length(conn)
+
+        response_record =
+          HTTPResponse.new(conn.status, content_length)
+
+        segment =
+          Segment.set_http_response(segment, response_record)
+
+        # TODO set error into segment if needed
 
         AwsExRay.finish_tracing(segment)
 
@@ -44,6 +68,20 @@ defmodule AwsExRay.Plug do
 
     end
 
+  end
+
+  defp get_user_agent(conn) do
+    case get_req_header(conn, "user-agent") do
+      []        -> nil
+      [value|_] -> value
+    end
+  end
+
+  defp get_response_content_length(conn) do
+    case get_resp_header(conn, "content-length") do
+      []        -> 0
+      [value|_] -> String.to_integer(value)
+    end
   end
 
   defp can_skip_tracing(conn, opts) do

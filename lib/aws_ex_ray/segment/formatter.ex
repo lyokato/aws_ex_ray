@@ -1,6 +1,8 @@
   defmodule AwsExRay.Segment.Formatter do
 
     alias AwsExRay.Segment
+    alias AwsExRay.Record.HTTPRequest
+    alias AwsExRay.Record.HTTPResponse
 
     def to_json(seg) do
       to_map(seg) |> Poison.encode!()
@@ -12,17 +14,45 @@
         id:          seg.id,
         trace_id:    seg.trace.root,
         start_time:  seg.start_time,
-        #annotations: seg.annotations,
+        annotations: seg.annotation,
         metadata:    seg.metadata
       }
       |> embed_version(seg)
       |> embed_progress(seg)
       |> embed_parent(seg)
+      |> embed_http(seg)
+    end
+
+    defp embed_http(m, seg) do
+      if seg.http.request == nil && seg.http.response == nil do
+        m
+      else
+        http = %{}
+             |> embed_http_request(seg)
+             |> embed_http_response(seg)
+        Map.put(m, :http, http)
+      end
+    end
+
+    defp embed_http_request(http, seg) do
+      if seg.http.request != nil do
+        Map.put(http, :request, HTTPRequest.to_map(seg.http.request))
+      else
+        http
+      end
+    end
+
+    defp embed_http_response(http, seg) do
+      if seg.http.response != nil do
+        Map.put(http, :response, HTTPResponse.to_map(seg.http.response))
+      else
+        http
+      end
     end
 
     defp embed_parent(m, seg) do
       if seg.trace.parent != "" do
-        Map.put(m, "parent_id", seg.trace.parent)
+        Map.put(m, :parent_id, seg.trace.parent)
       else
         m
       end
@@ -30,7 +60,7 @@
 
     defp embed_version(m, seg) do
       if seg.version != "" do
-        Map.put(m, "service", %{"version" => seg.version})
+        Map.put(m, :service, %{version: seg.version})
       else
         m
       end
@@ -38,9 +68,9 @@
 
     defp embed_progress(m, seg) do
       if Segment.finished?(seg) do
-        Map.put(m, "end_time", seg.end_time)
+        Map.put(m, :end_time, seg.end_time)
       else
-        Map.put(m, "in_progress", true)
+        Map.put(m, :in_progress, true)
       end
     end
 

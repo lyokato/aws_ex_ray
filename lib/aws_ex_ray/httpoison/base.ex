@@ -6,10 +6,10 @@ defmodule AwsExRay.HTTPoison.Base do
 
       use HTTPoison.Base
 
-      alias AwsExRay.Model.HTTPRequest
+      alias AwsExRay.Record.HTTPRequest
       alias AwsExRay.Subsegment
       alias AwsExRay.Trace
-      #alias AwsExRay.Model.HTTPResponse
+      #alias AwsExRay.Record.HTTPResponse
 
       #defoverridable [
       #  request: 5
@@ -17,8 +17,16 @@ defmodule AwsExRay.HTTPoison.Base do
 
       def request(method, url, body \\ "", headers \\ [], options \\ []) do
 
-        # TODO stuf request information
-        request_record = %HTTPRequest{}
+        request_record = %HTTPRequest{
+          segment_type: :subsegment,
+          method:       String.upcase(to_string(method)),
+          url:          url
+        }
+
+        # TODO put 'use_agent'
+
+        # TODO put 'traced' if needed
+        # USE ORIGINAL options
 
         subsegment = find_tracing_name(headers, url)
                    |> AwsExRay.start_subsegment(true)

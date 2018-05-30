@@ -1,4 +1,4 @@
-defmodule AwsExRay.Model.SQL do
+defmodule AwsExRay.Record.SQL do
 
   defstruct url:              nil,
             database_version: nil
