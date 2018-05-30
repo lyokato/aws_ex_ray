@@ -19,7 +19,7 @@ defmodule AwsExRay.HTTPoison.Base do
 
         case start_subsegment(headers, url) do
 
-          {:error, :out_of_xray_context} ->
+          {:error, :out_of_xray} ->
 
             super(method, url, body, headers, options)
 

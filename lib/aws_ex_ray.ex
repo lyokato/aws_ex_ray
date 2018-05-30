@@ -54,7 +54,7 @@ defmodule AwsExRay do
         {:ok, subsegment}
 
       {:error, :not_found} ->
-        {:error, :out_of_xray_context}
+        {:error, :out_of_xray}
 
     end
   end
@@ -72,11 +72,6 @@ defmodule AwsExRay do
 
     end
 
-  end
-
-  def current_context(), do: Store.Table.lookup()
-  def keep_context({trace, segment_id}) do
-    Store.Table.insert(trace, segment_id)
   end
 
 end
