@@ -22,7 +22,6 @@ defmodule AwsExRay.Test.PlugTest do
     AwsExRay.Client.Sandbox.Sink.Stub
     |> stub(:send, fn data ->
 
-      Logger.warn data
       Agent.update(agent, fn state -> [data|state] end)
 
     end)
