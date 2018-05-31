@@ -73,3 +73,13 @@ use `AwsExRay.HTTPoison` instead of `HTTPoison`
 result = AwsExRay.HTTPoison.get! "http://httparrot.herokuapp.com/get"
 ```
 
+## ExAws Example
+
+In your config file,
+set put `AwsExRay.ExAws.HTTPClient` to :http_client setting.
+
+```elixir
+config :ex_aws,
+  http_client: AwxExRay.ExAws.HTTPClient
+```
+
