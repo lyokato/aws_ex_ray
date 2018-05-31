@@ -62,7 +62,7 @@ defmodule AwsExRay do
   def finish_subsegment(subsegment, end_time \\ Util.now()) do
 
     subsegment = subsegment
-                 |> Subsegment.finish(end_time)
+               |> Subsegment.finish(end_time)
 
     if Subsegment.sampled?(subsegment) do
 

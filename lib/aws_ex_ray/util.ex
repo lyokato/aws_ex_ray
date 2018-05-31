@@ -15,4 +15,11 @@
       SecureRandom.hex(8)
     end
 
+    def get_header(headers, name, default \\ "") do
+      case Enum.filter(headers, fn {k, _} -> String.downcase(k) == name end) do
+        [] -> default
+        [header|_] -> header |> elem(1)
+      end
+    end
+
   end

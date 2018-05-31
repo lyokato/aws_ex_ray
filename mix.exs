@@ -24,6 +24,9 @@ defmodule AwsExRay.MixProject do
 
   defp deps do
     [
+      {:ex_aws, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"},
       {:httpoison, "~> 1.1"},
       {:mox, "~> 0.3.2", only: :test},
       {:plug, "~> 1.5"},

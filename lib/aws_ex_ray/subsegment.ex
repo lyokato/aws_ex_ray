@@ -6,21 +6,25 @@
     alias AwsExRay.Trace
     alias AwsExRay.Util
 
+    @type namespace :: :none | :remote | :aws
+
     @type t :: %__MODULE__{
-      segment: Segment.t,
-      remote:  boolean,
-      sql:     SQL.t,
+      segment:   Segment.t,
+      namespace: namespace,
+      sql:       SQL.t,
+      aws:       map,
     }
 
-    defstruct segment: nil,
-              remote:  false,
-              sql:     nil
+    defstruct segment:   nil,
+              namespace: :none,
+              sql:       nil,
+              aws:       nil,
 
-    def new(trace, name, remote) do
+    def new(trace, name, namespace \\ :none) do
       %__MODULE__{
-        segment: Segment.new(trace, name),
-        remote:  remote,
-        sql:     nil
+        segment:   Segment.new(trace, name),
+        namespace: namespace
+        sql:       nil
       }
     end
 

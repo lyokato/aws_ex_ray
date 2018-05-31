@@ -11,7 +11,7 @@
       m = AwsExRay.Segment.Formatter.to_map(seg.segment)
 
       Map.put(m, :type, "subsegment")
-      |> embed_remote(seg)
+      |> embed_namespace(seg)
       |> embed_sql(seg)
 
     end
@@ -24,11 +24,11 @@
       end
     end
 
-    defp embed_remote(m, seg) do
-      if seg.remote do
-        Map.put(m, :namespace, "remote")
-      else
+    defp embed_namespace(m, seg) do
+      if seg.namespace == :none do
         m
+      else
+        Map.put(m, :namespace, seg.namespace)
       end
     end
 

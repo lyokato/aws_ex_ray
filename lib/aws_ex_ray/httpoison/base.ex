@@ -9,6 +9,7 @@ defmodule AwsExRay.HTTPoison.Base do
       alias AwsExRay.Record.HTTPRequest
       alias AwsExRay.Record.HTTPResponse
       alias AwsExRay.Subsegment
+      alias AwsExRay.Util
 
       #defoverridable [
       #  request: 5
@@ -70,17 +71,11 @@ defmodule AwsExRay.HTTPoison.Base do
       end
 
       defp get_user_agent(headers) do
-        case headers |> Enum.filter(fn({k, _}) -> String.downcase(k) == "user-agent" end) do
-          [] -> ""
-          [header|_] -> header |> elem(1)
-        end
+        Util.get_header(headers, "user-agent")
       end
 
       defp get_response_content_length(headers) do
-        case headers |> Enum.filter(fn({k, _}) -> String.downcase(k) == "content-length" end) do
-          [] -> 0
-          [header|_] -> header |> elem(1) |> String.to_integer()
-        end
+        Util.get_header(headers, "content-length", "0") |> String.to_integer()
       end
 
       defp put_tracing_header(headers, subsegment) do
