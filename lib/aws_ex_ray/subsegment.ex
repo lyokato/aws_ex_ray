@@ -3,6 +3,7 @@
     alias AwsExRay.Record.SQL
     alias AwsExRay.Segment
     alias AwsExRay.Subsegment.Formatter
+    alias AwsExRay.Trace
     alias AwsExRay.Util
 
     @type t :: %__MODULE__{
@@ -41,6 +42,12 @@
 
     def set_http_response(seg, res) do
       put_in(seg.segment.http.response, res)
+    end
+
+    def generate_trace_value(seg) do
+      trace = seg.segment.trace
+      trace = %{trace|parent: seg.segment.id}
+      Trace.Formatter.to_http_header(trace)
     end
 
     def sampled?(seg) do

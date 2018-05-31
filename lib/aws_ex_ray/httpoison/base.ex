@@ -9,7 +9,6 @@ defmodule AwsExRay.HTTPoison.Base do
       alias AwsExRay.Record.HTTPRequest
       alias AwsExRay.Record.HTTPResponse
       alias AwsExRay.Subsegment
-      alias AwsExRay.Trace
 
       #defoverridable [
       #  request: 5
@@ -85,8 +84,7 @@ defmodule AwsExRay.HTTPoison.Base do
       end
 
       defp put_tracing_header(headers, subsegment) do
-        trace = Subsegment.get_trace(subsegment)
-        value = Trace.Formatter.to_http_header(trace)
+        value = Subsegment.generate_trace_value(subsegment)
         [{"X-Amzn-Trace-Id", value}|headers]
       end
 
