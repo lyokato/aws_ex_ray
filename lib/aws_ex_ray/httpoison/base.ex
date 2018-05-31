@@ -67,7 +67,7 @@ defmodule AwsExRay.HTTPoison.Base do
 
       defp start_subsegment(headers, url) do
         find_tracing_name(headers, url)
-        |> AwsExRay.start_subsegment(remote: true)
+        |> AwsExRay.start_subsegment(namespace: :remote)
       end
 
       defp get_user_agent(headers) do

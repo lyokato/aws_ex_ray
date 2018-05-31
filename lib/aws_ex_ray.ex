@@ -43,14 +43,14 @@ defmodule AwsExRay do
 
   def start_subsegment(name, opts \\ []) do
 
-    remote = Keyword.get(opts, :remote, false)
-    pid    = Keyword.get(opts, :tracing_pid, self())
+    ns  = Keyword.get(opts, :namespace, :none)
+    pid = Keyword.get(opts, :tracing_pid, self())
 
     case Store.Table.lookup(pid) do
 
       {:ok, trace, segment_id} ->
         subsegment = %{trace|parent: segment_id}
-                   |> Subsegment.new(name, remote)
+                   |> Subsegment.new(name, ns)
         {:ok, subsegment}
 
       {:error, :not_found} ->

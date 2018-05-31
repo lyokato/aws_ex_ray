@@ -7,7 +7,7 @@ defmodule AwsExRay.Ecto.SubsegmentLogger do
   def log(entry) do
 
     opts = [
-      remote:      true,
+      namespace:   :remote,
       tracing_pid: entry.caller_pid
     ]
 

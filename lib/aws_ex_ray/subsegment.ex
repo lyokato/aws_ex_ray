@@ -18,14 +18,19 @@
     defstruct segment:   nil,
               namespace: :none,
               sql:       nil,
-              aws:       nil,
+              aws:       nil
 
     def new(trace, name, namespace \\ :none) do
       %__MODULE__{
         segment:   Segment.new(trace, name),
-        namespace: namespace
-        sql:       nil
+        namespace: namespace,
+        sql:       nil,
+        aws:       nil
       }
+    end
+
+    def set_aws(seg, params) do
+      Map.put(seg, :aws, params)
     end
 
     def set_start_time(seg, start_time) do
