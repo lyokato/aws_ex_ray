@@ -38,13 +38,13 @@
         start_time: Util.now(),
         error:      nil,
         end_time:   0,
-        annotation: %{},
+        annotation: %{} |> Map.merge(Config.default_annotation),
         metadata: %{
           tracing_sdk: %{
             name:    Config.library_name,
             version: Config.library_version,
           }
-        },
+        } |> Map.merge(Config.default_metadata),
         http: %{
           request: nil,
           response: nil

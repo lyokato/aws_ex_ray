@@ -39,6 +39,14 @@ defmodule AwsExRay.Config do
         @default_daemon_port)
   end
 
+  def default_annotation() do
+    get(:default_annotation, %{})
+  end
+
+  def default_metadata() do
+    get(:default_metadata, %{})
+  end
+
   def store_monitor_pool_size() do
     get(:store_monitor_pool_size,
         @default_store_monitor_pool_size)
