@@ -52,6 +52,12 @@
       }
     end
 
+    def add_annotation(seg, key, value) do
+      annotation = seg.annotation
+      annotation = Map.put(annotation, key, value)
+      Map.put(seg, :annotation, annotation)
+    end
+
     def set_http_request(seg, req) do
       put_in(seg.http.request, req)
     end

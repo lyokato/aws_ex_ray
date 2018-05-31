@@ -29,6 +29,12 @@
       }
     end
 
+    def add_annotation(seg, key, value) do
+      annotation = seg.segment.annotation
+      annotation = Map.put(annotation, key, value)
+      put_in(seg.segment.annotation, annotation)
+    end
+
     def set_aws(seg, params) do
       Map.put(seg, :aws, params)
     end
