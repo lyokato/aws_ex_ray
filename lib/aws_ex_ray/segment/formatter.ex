@@ -27,7 +27,7 @@
 
     defp embed_error(m, seg) do
       if seg.error == nil do
-        seg
+        m
       else
         error = Error.to_map(seg.error)
         Map.put(m, :error, error)
