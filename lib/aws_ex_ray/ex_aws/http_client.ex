@@ -4,10 +4,7 @@ defmodule AwsExRay.ExAws.HTTPClient do
 
   # HTTPベースのAWSマネージドサービスを使う場合
   # subsegmentのnamespaceは、'remote'ではなく'aws'になる
-  # http.requestは外してresponseだけをつける
-  #
-  # https://github.com/aws/aws-xray-sdk-node/blob/master/packages/core/lib/resources/aws_whitelist.json
-
+  # http.requestは外してhttp.responseだけをつける
   alias AwsExRay.Util
   alias AwsExRay.ExAws.WhiteList
 

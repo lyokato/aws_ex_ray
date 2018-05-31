@@ -59,6 +59,10 @@
       put_in(seg.segment.http.response, res)
     end
 
+    def set_error(seg, error) do
+      put_in(seg.segment.error, error)
+    end
+
     def generate_trace_value(seg) do
       trace = seg.segment.trace
       trace = %{trace|parent: seg.segment.id}

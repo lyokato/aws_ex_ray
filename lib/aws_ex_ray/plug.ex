@@ -3,9 +3,12 @@ defmodule AwsExRay.Plug do
   import Plug.Conn
 
   alias AwsExRay.Plug.Paths
+  alias AwsExRay.Record.Error
+  alias AwsExRay.Record.Error.Cause
   alias AwsExRay.Record.HTTPRequest
   alias AwsExRay.Record.HTTPResponse
   alias AwsExRay.Segment
+  alias AwsExRay.Stacktrace
   alias AwsExRay.Trace
 
   @type http_method :: :get | :post | :put | :delete
@@ -50,15 +53,24 @@ defmodule AwsExRay.Plug do
 
       register_before_send(conn, fn conn ->
 
+        status = conn.status
+
         content_length = get_response_content_length(conn)
 
         response_record =
-          HTTPResponse.new(conn.status, content_length)
+          HTTPResponse.new(status, content_length)
 
         segment =
           Segment.set_http_response(segment, response_record)
 
-        # TODO set error into segment if needed
+        segment =
+          if status >= 400 && status < 600 do
+            put_response_error(segment,
+                               status,
+                               Stacktrace.stacktrace())
+          else
+            segment
+          end
 
         AwsExRay.finish_tracing(segment)
 
@@ -68,6 +80,49 @@ defmodule AwsExRay.Plug do
 
     end
 
+  end
+
+  defp put_response_error(seg, status, stack) do
+    case status do
+
+      code when code == 429 ->
+
+        cause = Cause.new(:http_response_error, "Got 429", stack)
+        error = %Error{
+          cause:    cause,
+          throttle: true,
+          error:    true,
+          fault:    false,
+          remote:   false,
+        }
+        Segment.set_error(seg, error)
+
+      code when code >= 400 and code < 500 ->
+        cause = Cause.new(:http_response_error, "Got 4xx", stack)
+        error = %Error{
+          cause:    cause,
+          throttle: false,
+          error:    true,
+          fault:    false,
+          remote:   false,
+        }
+        Segment.set_error(seg, error)
+
+      code when code >= 500 and code < 600 ->
+        cause = Cause.new(:http_response_error, "Got 5xx", stack)
+        error = %Error{
+          cause:    cause,
+          throttle: false,
+          error:    false,
+          fault:    true,
+          remote:   false,
+        }
+        Segment.set_error(seg, error)
+
+      _ ->
+        seg
+
+    end
   end
 
   defp get_user_agent(conn) do

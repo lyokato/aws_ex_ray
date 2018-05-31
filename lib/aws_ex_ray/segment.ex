@@ -14,6 +14,7 @@
       end_time:   number,
       annotation: map,
       metadata:   map,
+      error:      map,
       http:       map
     }
 
@@ -23,6 +24,7 @@
               trace:      nil,
               start_time: 0,
               end_time:   0,
+              error:      %{},
               annotation: %{},
               metadata:   %{},
               http: %{}
@@ -34,6 +36,7 @@
         version:    Config.service_version(),
         trace:      trace,
         start_time: Util.now(),
+        error:      nil,
         end_time:   0,
         annotation: %{
           # TODO how to set hostname? by AWS-CLI API?
@@ -64,6 +67,10 @@
 
     def set_http_response(seg, res) do
       put_in(seg.http.response, res)
+    end
+
+    def set_error(seg, error) do
+      Map.put(seg, :error, error)
     end
 
     def sampled?(seg) do

@@ -1,6 +1,7 @@
   defmodule AwsExRay.Segment.Formatter do
 
     alias AwsExRay.Segment
+    alias AwsExRay.Record.Error
     alias AwsExRay.Record.HTTPRequest
     alias AwsExRay.Record.HTTPResponse
 
@@ -23,6 +24,15 @@
       |> embed_http(seg)
     end
 
+    defp embed_error(m, seg) do
+      if seg.error == nil do
+        seg
+      else
+        error = Error.to_map(seg.error)
+        Map.put(m, :error, error)
+      end
+    end
+
     defp embed_http(m, seg) do
       if seg.http.request == nil && seg.http.response == nil do
         m
@@ -36,7 +46,8 @@
 
     defp embed_http_request(http, seg) do
       if seg.http.request != nil do
-        Map.put(http, :request, HTTPRequest.to_map(seg.http.request))
+        req = HTTPRequest.to_map(seg.http.request)
+        Map.put(http, :request, req)
       else
         http
       end
@@ -44,7 +55,8 @@
 
     defp embed_http_response(http, seg) do
       if seg.http.response != nil do
-        Map.put(http, :response, HTTPResponse.to_map(seg.http.response))
+        res = HTTPResponse.to_map(seg.http.response)
+        Map.put(http, :response, res)
       else
         http
       end
