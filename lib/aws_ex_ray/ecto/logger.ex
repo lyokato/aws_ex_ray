@@ -1,4 +1,4 @@
-defmodule AwsExRay.Ecto.SubsegmentLogger do
+defmodule AwsExRay.Ecto.Logger do
 
   alias AwsExRay.Record.SQL
   alias AwsExRay.Subsegment

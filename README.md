@@ -52,7 +52,7 @@ end
 ## Ecto Example
 
 In your config file,
-set put `AwsExRay.Ecto.SubsegmentLogger` into Ecto's logger setting.
+set put `AwsExRay.Ecto.Logger` into Ecto's logger setting.
 
 ```elixir
 config :my_app, MyApp.EctoRepo,
@@ -62,7 +62,7 @@ config :my_app, MyApp.EctoRepo,
   database: "my_db",
   username: "foo",
   password: "bar",
-  loggers:  [Ecto.LogEntry, AwsExRay.Ecto.SubsegmentLogger]
+  loggers:  [Ecto.LogEntry, AwsExRay.Ecto.Logger]
 ```
 
 ## HTTPoison Example

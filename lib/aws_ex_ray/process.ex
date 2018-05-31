@@ -18,5 +18,4 @@ defmodule AwsExRay.Process do
 
   end
 
-
 end

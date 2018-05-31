@@ -1,5 +1,15 @@
 defmodule AwsExRay.Record.SQL do
 
+  @type t :: %__MODULE__{
+    url:               String.t,
+    database_version:  String.t,
+    database_type:     String.t,
+    sanitized_query:   String.t,
+    connection_string: String.t,
+    driver_version:    String.t,
+    preparation:       String.t
+  }
+
   defstruct url:               nil,
             database_version:  nil,
             database_type:     nil,
