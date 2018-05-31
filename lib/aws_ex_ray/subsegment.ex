@@ -66,7 +66,7 @@
     def generate_trace_value(seg) do
       trace = seg.segment.trace
       trace = %{trace|parent: seg.segment.id}
-      Trace.Formatter.to_http_header(trace)
+      Trace.to_string(trace)
     end
 
     def sampled?(seg) do

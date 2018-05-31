@@ -1,6 +1,7 @@
 defmodule AwsExRay.Trace do
 
   alias AwsExRay.Config
+  alias AwsExRay.Trace.Formatter
   alias AwsExRay.Util
 
   @type t :: %__MODULE__{
@@ -38,5 +39,8 @@ defmodule AwsExRay.Trace do
   defp sample?() do
     :rand.uniform() <= Config.sampling_rate
   end
+
+  def parse(value), do: Formatter.parse(value)
+  def to_string(trace), do: Formatter.to_string(trace)
 
 end

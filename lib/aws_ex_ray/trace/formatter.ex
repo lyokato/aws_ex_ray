@@ -1,6 +1,6 @@
 defmodule AwsExRay.Trace.Formatter do
 
-  def parse_http_header(header) do
+  def parse(header) do
 
     m = parse_to_map(header)
 
@@ -38,7 +38,7 @@ defmodule AwsExRay.Trace.Formatter do
 
   end
 
-  def to_http_header(trace) do
+  def to_string(trace) do
     "Root=#{trace.root}"
     |> add_parent_if_needed(trace.parent)
     |> add_sampled_if_needed(trace.sampled)
