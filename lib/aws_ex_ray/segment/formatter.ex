@@ -22,6 +22,7 @@
       |> embed_progress(seg)
       |> embed_parent(seg)
       |> embed_http(seg)
+      |> embed_error(seg)
     end
 
     defp embed_error(m, seg) do

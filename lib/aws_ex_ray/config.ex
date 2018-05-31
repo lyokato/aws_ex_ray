@@ -34,7 +34,7 @@ defmodule AwsExRay.Config do
 
   end
 
-  def daemon_port(), do:
+  def daemon_port() do
     get(:daemon_port,
         @default_daemon_port)
   end
