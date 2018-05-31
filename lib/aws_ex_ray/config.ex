@@ -9,13 +9,9 @@ defmodule AwsExRay.Config do
   @default_client_module        AwsExRay.Client.UDPClientSupervisor
   @default_sandbox_sink_module  AwsExRay.Client.Sandbox.Sink.Ignore
 
-  def library_name() do
-    "aws-ex-ray"
-  end
+  def library_name(), do: "aws-ex-ray"
 
-  def library_version() do
-    "0.0.1"
-  end
+  def library_version(), do: "0.0.1"
 
   def get(key, default) do
     Application.get_env(:aws_ex_ray, key, default)
@@ -38,7 +34,7 @@ defmodule AwsExRay.Config do
 
   end
 
-  def daemon_port() do
+  def daemon_port(), do:
     get(:daemon_port,
         @default_daemon_port)
   end

@@ -38,10 +38,7 @@
         start_time: Util.now(),
         error:      nil,
         end_time:   0,
-        annotation: %{
-          # TODO how to set hostname? by AWS-CLI API?
-          hostname: "",
-        },
+        annotation: %{},
         metadata: %{
           tracing_sdk: %{
             name:    Config.library_name,
