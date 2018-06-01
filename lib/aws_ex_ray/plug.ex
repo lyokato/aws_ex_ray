@@ -34,7 +34,11 @@ defmodule AwsExRay.Plug do
 
   def call(conn, opts) do
 
-    if !can_skip_tracing(conn, opts) do
+    if can_skip_tracing(conn, opts) do
+
+      conn
+
+    else
 
       trace = get_trace(conn)
 
