@@ -38,15 +38,16 @@ defmodule AwsExRay.Plug do
 
       trace = get_trace(conn)
 
+      {addr, forwarded} = find_client_ip(conn)
+
       request_record = %HTTPRequest{
-        segment_type: :segment,
-        method:       conn.method,
-        url:          request_url(conn),
-        user_agent:   get_user_agent(conn),
+        segment_type:    :segment,
+        method:          conn.method,
+        url:             request_url(conn),
+        user_agent:      get_user_agent(conn),
+        client_ip:       addr,
+        x_forwarded_for: forwarded
       }
-      # TODO
-      #  client_ip,
-      #  x_forwarded_for
 
       segment = AwsExRay.start_tracing(trace, opts.name)
               |> Segment.set_http_request(request_record)
@@ -80,6 +81,32 @@ defmodule AwsExRay.Plug do
 
     end
 
+  end
+
+  defp find_client_ip(conn) do
+    case get_req_header(conn, "x-real-ip") do
+
+      [] ->
+        case get_req_header(conn, "x-forwarded-for") do
+
+          [] ->
+            case get_req_header(conn, "remote_addr") do
+
+              [] ->
+                addr = "#{:inet.ntoa(conn.remote_ip)}"
+                {addr, false}
+
+              [value|_] -> {value, false}
+
+            end
+
+          [value|_] ->
+            addr = value |> String.split(",") |> List.first |> String.trim
+            {addr, true}
+        end
+
+      [value|_] -> {value, true}
+    end
   end
 
   defp put_response_error(seg, status, stack) do
