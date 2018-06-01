@@ -30,7 +30,6 @@ defmodule AwsExRay.ExAws.HTTPClient do
         aws_req_params = gather_aws_request_params(whitelist, body)
 
         headers = HTTPClientUtil.put_tracing_header(headers, subsegment)
-        headers = [{"X-Amzn-Xray-Name", service}|headers]
 
         result = HTTPoison.request(method, url, body, headers, opts)
 
