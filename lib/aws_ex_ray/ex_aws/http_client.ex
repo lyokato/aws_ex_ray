@@ -14,73 +14,78 @@ defmodule AwsExRay.ExAws.HTTPClient do
   @impl ExAws.Request.HttpClient
   def request(method, url, body \\ "", headers \\ [], opts \\ []) do
 
-    {service, operation} = parse_target(headers)
+    case parse_target(headers) do
 
-    case AwsExRay.start_subsegment(service, namespace: :aws) do
+      # This is not an AWS operation request
+      :error ->
+        AwsExRay.HTTPoison.request(method, url, body, headers, opts)
 
-      {:error, :out_of_xray} ->
-        HTTPoison.request(method, url, body, headers, opts)
+      {:ok, service, operation} ->
+        case AwsExRay.start_subsegment(service, namespace: :aws) do
 
-      {:ok, subsegment} ->
+          {:error, :out_of_xray} ->
+            HTTPoison.request(method, url, body, headers, opts)
 
-        {service, operation} = parse_target(headers)
+          {:ok, subsegment} ->
 
-        whitelist = WhiteList.find(service, operation)
+            whitelist = WhiteList.find(service, operation)
 
-        aws_req_params = gather_aws_request_params(whitelist, body)
+            aws_req_params = gather_aws_request_params(whitelist, body)
 
-        headers = HTTPClientUtil.put_tracing_header(headers, subsegment)
+            headers = HTTPClientUtil.put_tracing_header(headers, subsegment)
 
-        result = HTTPoison.request(method, url, body, headers, opts)
+            result = HTTPoison.request(method, url, body, headers, opts)
 
-        subsegment = case result do
+            subsegment = case result do
 
-          {:ok, %HTTPoison.Response{status_code: code, headers: headers, body: body}} ->
+              {:ok, %HTTPoison.Response{status_code: code, headers: headers, body: body}} ->
 
-            len = HTTPClientUtil.get_response_content_length(headers)
-            res = HTTPResponse.new(code, len)
+                len = HTTPClientUtil.get_response_content_length(headers)
+                res = HTTPResponse.new(code, len)
 
-            subsegment = Subsegment.set_http_response(subsegment, res)
+                subsegment = Subsegment.set_http_response(subsegment, res)
 
-            aws_res_params = gather_aws_response_params(whitelist, body)
+                aws_res_params = gather_aws_response_params(whitelist, body)
 
-            request_id = Util.get_header(headers, "x-amzn-RequestId")
+                request_id = Util.get_header(headers, "x-amzn-RequestId")
 
-            aws = %{
-              request_id: request_id,
-              operation:  operation,
-            }
-            |> Map.merge(aws_req_params)
-            |> Map.merge(aws_res_params)
+                aws = %{
+                  request_id: request_id,
+                  operation:  operation,
+                }
+                |> Map.merge(aws_req_params)
+                |> Map.merge(aws_res_params)
 
-            subsegment = Subsegment.set_aws(subsegment, aws)
+                subsegment = Subsegment.set_aws(subsegment, aws)
 
-            if code >= 400 and code < 600 do
-              HTTPClientUtil.put_response_error(subsegment,
-                                                code,
-                                                Stacktrace.stacktrace())
-            else
-              subsegment
+                if code >= 400 and code < 600 do
+                  HTTPClientUtil.put_response_error(subsegment,
+                                                    code,
+                                                    Stacktrace.stacktrace())
+                else
+                  subsegment
+                end
+
+              {:error, %HTTPoison.Error{reason: reason}} ->
+                cause = Cause.new(:http_response_error,
+                                  "#{reason}",
+                                  Stacktrace.stacktrace())
+                error = %Error{
+                  cause:    cause,
+                  throttle: false,
+                  error:    false,
+                  fault:    true,
+                  remote:   false,
+                }
+                Subsegment.set_error(subsegment, error)
+
             end
 
-          {:error, %HTTPoison.Error{reason: reason}} ->
-            cause = Cause.new(:http_response_error,
-                              "#{reason}",
-                              Stacktrace.stacktrace())
-            error = %Error{
-              cause:    cause,
-              throttle: false,
-              error:    false,
-              fault:    true,
-              remote:   false,
-            }
-            Subsegment.set_error(subsegment, error)
+            AwsExRay.finish_subsegment(subsegment)
+
+            result
 
         end
-
-        AwsExRay.finish_subsegment(subsegment)
-
-        result
 
     end
 
@@ -112,15 +117,11 @@ defmodule AwsExRay.ExAws.HTTPClient do
     case headers |> Util.get_header("x-amz-target") |> String.split(".") do
       [svc_and_ver, operation] ->
         case String.split(svc_and_ver, "_") do
-          [svc, _ver] -> {svc, operation}
-          _ -> raise_invalid_target(headers)
+          [svc, _ver] -> {:ok, svc, operation}
+          _ -> :error
         end
-      _ -> raise_invalid_target(headers)
+      _ -> :error
     end
-  end
-
-  defp raise_invalid_target(headers) do
-    raise "valid X-Amz-Target not found: #{inspect headers}"
   end
 
 end
