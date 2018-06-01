@@ -1,6 +1,8 @@
 # AwsExRay
 
-## IN PROGRESS
+## NOT STABLE YES
+
+Please wait version 1.0.0 released.
 
 ## Installation
 
@@ -8,9 +10,26 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `aws_ex_ray` to your list of dependencies in `mix.exs`:
 
 ```elixir
+def application do
+  [
+    extra_applications: [
+      :logger,
+      :aws_ex_ray
+      # ...
+    ],
+    mod {MyApp.Supervisor, []}
+  ]
+end
+
 def deps do
   [
-    {:aws_ex_ray, "~> 0.1.0"}
+    {:aws_ex_ray, "~> 0.1.0"},
+
+    # add support libraries as you like
+    {:aws_ex_ray_plug, "~> 0.1.0"},
+    {:aws_ex_ray_ecto, "~> 0.1.0"},
+    {:aws_ex_ray_httpoison, "~> 0.1.0"},
+    {:aws_ex_ray_ex_aws, "~> 0.1.0"}
   ]
 end
 ```
@@ -19,8 +38,9 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/aws_ex_ray](https://hexdocs.pm/aws_ex_ray).
 
+## Plug Support
 
-## Plug Example
+https://github.com/lyokato/aws_ex_ray_plug
 
 In your router, set `AwsExRay.Plug`.
 
@@ -49,10 +69,12 @@ defmodule MyPlugRouter do
 end
 ```
 
-## Ecto Example
+## Ecto Support
+
+https://github.com/lyokato/aws_ex_ray_ecto
 
 In your config file,
-set put `AwsExRay.Ecto.Logger` into Ecto's logger setting.
+put `AwsExRay.Ecto.Logger` into Ecto's `:loggers` setting.
 
 ```elixir
 config :my_app, MyApp.EctoRepo,
@@ -65,7 +87,9 @@ config :my_app, MyApp.EctoRepo,
   loggers:  [Ecto.LogEntry, AwsExRay.Ecto.Logger]
 ```
 
-## HTTPoison Example
+## HTTPoison Support
+
+https://github.com/lyokato/aws_ex_ray_httpoison
 
 use `AwsExRay.HTTPoison` instead of `HTTPoison`
 
@@ -73,10 +97,12 @@ use `AwsExRay.HTTPoison` instead of `HTTPoison`
 result = AwsExRay.HTTPoison.get! "http://httparrot.herokuapp.com/get"
 ```
 
-## ExAws Example
+## ExAws Support
+
+https://github.com/lyokato/aws_ex_ray_ex_aws
 
 In your config file,
-set put `AwsExRay.ExAws.HTTPClient` to :http_client setting.
+put `AwsExRay.ExAws.HTTPClient` to `:http_client` setting.
 
 ```elixir
 config :ex_aws,
