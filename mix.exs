@@ -32,6 +32,7 @@ defmodule AwsExRay.MixProject do
       {:plug, "~> 1.5"},
       {:poison, "~> 3.1"},
       {:poolboy, "~> 1.5"},
+      {:recase, "~> 0.2"},
       {:secure_random, "~> 0.5"}
     ]
   end

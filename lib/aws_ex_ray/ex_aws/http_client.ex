@@ -2,44 +2,110 @@ defmodule AwsExRay.ExAws.HTTPClient do
 
   @behaviour ExAws.Request.HttpClient
 
-  # HTTPベースのAWSマネージドサービスを使う場合
-  # subsegmentのnamespaceは、'remote'ではなく'aws'になる
-  # http.requestは外してhttp.responseだけをつける
-  alias AwsExRay.Util
   alias AwsExRay.ExAws.WhiteList
+  alias AwsExRay.HTTPClientUtil
+  alias AwsExRay.Record.Error
+  alias AwsExRay.Record.Error.Cause
+  alias AwsExRay.Record.HTTPResponse
+  alias AwsExRay.Subsegment
+  alias AwsExRay.Stacktrace
+  alias AwsExRay.Util
 
   @impl ExAws.Request.HttpClient
-  def request(method, url, body, headers, opts) do
+  def request(method, url, body \\ "", headers \\ [], opts \\ []) do
 
     {service, operation} = parse_target(headers)
-    params = Poison.decode!(body)
-    aws_record = gather_operation_params(service, operation, params)
-    aws_record = Map.put(aws_record, :operation, operation)
-    #aws_record = Map.put(aws_record, :request_id, operation)
 
-    # name - service
+    case AwsExRay.start_subsegment(service, namespace: :aws) do
 
-    headers = [{"X-Amzn-Xray-Name", service}|headers]
-    AwsExRay.HTTPoison.request(method, url, body, headers, opts)
+      {:error, :out_of_xray} ->
+        HTTPoison.request(method, url, body, headers, opts)
+
+      {:ok, subsegment} ->
+
+        {service, operation} = parse_target(headers)
+
+        whitelist = WhiteList.find(service, operation)
+
+        aws_req_params = gather_aws_request_params(whitelist, body)
+
+        headers = HTTPClientUtil.put_tracing_header(headers, subsegment)
+        headers = [{"X-Amzn-Xray-Name", service}|headers]
+
+        result = HTTPoison.request(method, url, body, headers, opts)
+
+        subsegment = case result do
+
+          {:ok, %HTTPoison.Response{status_code: code, headers: headers, body: body}} ->
+
+            len = HTTPClientUtil.get_response_content_length(headers)
+            res = HTTPResponse.new(code, len)
+
+            subsegment = Subsegment.set_http_response(subsegment, res)
+
+            aws_res_params = gather_aws_response_params(whitelist, body)
+
+            request_id = Util.get_header(headers, "x-amzn-RequestId")
+
+            aws = %{
+              request_id: request_id,
+              operation:  operation,
+            }
+            |> Map.merge(aws_req_params)
+            |> Map.merge(aws_res_params)
+
+            subsegment = Subsegment.set_aws(subsegment, aws)
+
+            if code >= 400 and code < 600 do
+              HTTPClientUtil.put_response_error(subsegment,
+                                                code,
+                                                Stacktrace.stacktrace())
+            else
+              subsegment
+            end
+
+          {:error, %HTTPoison.Error{reason: reason}} ->
+            cause = Cause.new(:http_response_error,
+                              "#{reason}",
+                              Stacktrace.stacktrace())
+            error = %Error{
+              cause:    cause,
+              throttle: false,
+              error:    false,
+              fault:    true,
+              remote:   false,
+            }
+            Subsegment.set_error(subsegment, error)
+
+        end
+
+        AwsExRay.finish_subsegment(subsegment)
+
+        result
+
+    end
 
   end
 
-  defp gather_operation_params(service, operation, _params) do
-    case find_whitelist(service, operation) do
-      {:ok, _whitelist} -> %{} # TODO
-      {:error, :not_found} -> %{}
+  defp gather_aws_response_params(_whitelist, ""), do: %{}
+  defp gather_aws_response_params(whitelist, body) do
+    case Poison.decode(body) do
+      {:ok, json} ->
+        WhiteList.gather(:response, json, whitelist)
+
+      _ -> %{}
     end
   end
 
-  defp find_whitelist(service, operation) do
-    case Map.get(WhiteList.get(), String.downcase(service)) do
-      service_params when is_map(service_params) ->
-        case Map.get(service_params, operation) do
-          operation_params when is_map(operation_params) ->
-            {:ok, operation_params}
-          nil -> {:error, :not_found}
-        end
-      nil -> {:error, :not_found}
+  defp gather_aws_request_params(_whitelist, ""), do: %{}
+  defp gather_aws_request_params(whitelist, body) do
+    case Poison.decode(body) do
+
+      {:ok, json} ->
+        WhiteList.gather(:request, json, whitelist)
+
+      _ -> %{}
+
     end
   end
 

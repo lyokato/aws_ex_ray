@@ -13,7 +13,16 @@
       Map.put(m, :type, "subsegment")
       |> embed_namespace(seg)
       |> embed_sql(seg)
+      |> embed_aws(seg)
 
+    end
+
+    defp embed_aws(m, seg) do
+      if seg.aws != nil do
+        Map.put(m, :aws, seg.aws)
+      else
+        m
+      end
     end
 
     defp embed_sql(m, seg) do

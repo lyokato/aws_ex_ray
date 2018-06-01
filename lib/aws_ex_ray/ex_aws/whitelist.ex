@@ -1,5 +1,7 @@
 defmodule AwsExRay.ExAws.WhiteList do
 
+  # This data is borrowed from https://github.com/aws/aws-xray-sdk-node
+
   @list %{
     "services" => %{
       "dynamodb" => %{
@@ -437,6 +439,81 @@ defmodule AwsExRay.ExAws.WhiteList do
     }
   }
 
-  def get(), do: @list
+  def find(service, operation) do
+
+    services = Map.get(@list, "services")
+
+    case Map.get(services, String.downcase(service)) do
+
+
+      service_params when is_map(service_params) ->
+        operations = Map.get(service_params, "operations")
+        case Map.get(operations, Recase.to_camel(operation)) do
+
+          operation_params when is_map(operation_params) ->
+            operation_params
+
+          _other -> %{}
+        end
+
+      _other -> %{}
+
+    end
+
+  end
+
+  def gather(type, params, whitelist) do
+    m1 = gather_parameters(type, params, whitelist)
+    m2 = gather_descriptors(type, params, whitelist)
+    Map.merge(m1, m2)
+  end
+
+  defp gather_parameters(type, params, whitelist) do
+    case Map.get(whitelist, "#{type}_parameters") do
+
+      keys when is_list(keys) ->
+        keys
+        |> Enum.filter(&Map.has_key?(params, &1))
+        |> Map.new(fn key ->
+          value = Map.get(params, key)
+          key   = Recase.to_snake(key)
+          {key,value}
+        end)
+
+      _other -> %{}
+
+    end
+  end
+
+  defp gather_descriptors(type, params, whitelist) do
+    case Map.get(whitelist, "#{type}_descriptors") do
+
+      desc when is_map(desc) ->
+        Map.keys(desc)
+        |> Enum.filter(&Map.has_key?(params, &1))
+        |> Map.new(fn key ->
+          value = Map.get(params, key)
+          rule  = Map.get(desc, key)
+          case rule do
+
+            %{"get_keys" => true, "rename_to" => rename} when is_map(value) ->
+              {rename, Map.keys(value)}
+
+            %{"rename_to" => rename} ->
+              {rename, value}
+
+            %{"list" => true, "get_count" => true, "rename_to" => rename} when is_list(value) ->
+              {rename, length(value)}
+
+            _ ->
+              {key, value}
+
+          end
+        end)
+
+      _other -> %{}
+
+    end
+  end
 
 end
