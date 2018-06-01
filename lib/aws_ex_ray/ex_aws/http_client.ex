@@ -113,14 +113,14 @@ defmodule AwsExRay.ExAws.HTTPClient do
       [svc_and_ver, operation] ->
         case String.split(svc_and_ver, "_") do
           [svc, _ver] -> {svc, operation}
-          _ -> raise_invalid_target()
+          _ -> raise_invalid_target(headers)
         end
-      _ -> raise_invalid_target()
+      _ -> raise_invalid_target(headers)
     end
   end
 
-  defp raise_invalid_target() do
-    raise "valid X-Amz-Target not found"
+  defp raise_invalid_target(headers) do
+    raise "valid X-Amz-Target not found: #{inspect headers}"
   end
 
 end
