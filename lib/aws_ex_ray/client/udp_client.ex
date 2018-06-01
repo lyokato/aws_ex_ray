@@ -54,7 +54,7 @@ defmodule AwsExRay.Client.UDPClient do
     {:stop, :normal, state}
   end
 
-  def handle_call({:send, data}, state) do
+  def handle_call({:send, data}, _from, state) do
     case send_data(data, state) do
       :ok ->
         {:reply, :ok, state}
@@ -97,14 +97,8 @@ defmodule AwsExRay.Client.UDPClient do
       state.socket,
       state.address,
       state.port,
-      pack_data(data)
+      @header <> data <> "\n"
     )
-  end
-
-  defp pack_data(data) do
-    (@header <> data <> "\n")
-    |> String.to_charlist
-    |> :erlang.term_to_binary
   end
 
 end
