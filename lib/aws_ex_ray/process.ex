@@ -2,6 +2,8 @@ defmodule AwsExRay.Process do
 
   alias AwsExRay.Store
 
+  @spec keep_tracing(pid) :: :ok | {:error, :out_of_xray}
+
   def keep_tracing(tracing_pid) do
 
     case Store.Table.lookup(tracing_pid) do

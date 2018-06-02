@@ -38,7 +38,173 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/aws_ex_ray](https://hexdocs.pm/aws_ex_ray).
 
-## Plug Support
+## USAGE
+
+```elixir
+trace = Trace.new()
+segment = AwsExRay.start_tracing(trace, "root_segment_name")
+do_your_job()
+AwsExRay.finish_tracing(segment)
+```
+
+```
+def do_your_job() do
+
+  current_trace = AwsExRay.start_subsegment("subsegment-name")
+
+  do_some_work()
+
+  case current_trace do
+    {:ok, subsegment} ->
+      AwsExRay.finish_subsegment(subsegment)
+
+    {:error, :out_of_xray} -> :ok # you need to do nothing.
+  end
+
+  AwsExRay.finish_subsegment(subsegment)
+end
+```
+
+
+## Multi Processes
+
+Following example doesn't work.
+`start_subsegment` returns always `{:error, :out_of_xray}`.
+Because the subsegment is not on the process which start tracing.
+
+Pay attention when you use Task.Supervisor or GenServer.
+
+```elixir
+segment = AwsExRay.start_tracing(trace, "root_segment_name")
+
+Task.Supervisor.start_child(MyTaskSupervisor, fn ->
+
+  ####################################################################
+  # this function is executed on different process as root-segemnet!!!
+  ####################################################################
+
+  current_trace = AwsExRay.start_subsegment("subsegment-name")
+
+  do_some_work()
+
+  case current_trace do
+    {:ok, subsegment} ->
+      AwsExRay.finish_subsegment(subsegment)
+
+    {:error, :out_of_xray} -> :ok
+  end
+
+end)
+```
+The solution.
+
+Call `AwsExRay.Process.keep_tracing( process_which_starts_tracing)` like following
+
+```elixir
+segment = AwsExRay.start_tracing(trace, "root_segment_name")
+
+tracing_pid = self()
+
+Task.Supervisor.start_child(MyTaskSupervisor, fn ->
+
+  AwsExRay.Process.keep_tracing(tracing_pid)
+
+  current_trace = AwsExRay.start_subsegment("subsegment-name")
+
+  do_some_work()
+
+  case current_trace do
+    {:ok, subsegment} ->
+      AwsExRay.finish_subsegment(subsegment)
+
+    {:error, :out_of_xray} -> :ok
+  end
+
+end)
+```
+
+## Multi Servers
+
+```
+[client] --> [1: front_server] --> [2: internal_api or job_worker]
+```
+
+You can tracking **Trace** including (2) not only (1).
+If (2) server is HTTP server. You can put *X-Amzn-Trace-Id* into your requests HTTP headers.
+
+### calling internal api on (1)
+
+If you use AwsExRay.HTTPoison, it's easy. all you have to do is to set `:traced` option.
+
+```elixir
+options = [traced: true]
+result = AwsExRay.HTTPoison.get(url, headers, options)
+```
+
+### received internal request on (2)
+
+If you use AwsExRay.Plug, automatically continue tracing.
+
+```elixir
+defmodule MyInternalAPIRouter do
+
+  use Plug.Router
+
+  plug AwsExRay.Plug, name: "my-internal-api"
+```
+
+### WITHOUT SUPPORT LIBRARIES
+
+You can directory pass **Trace** value
+
+```elixir
+trace_value = #{segment.trace}
+
+pass_job_in_some_way(%{
+  your_job_data: ...
+  trace: trace_value
+})
+```
+
+And job worker side, it can take over the **Trace**
+
+```elixir
+
+job = receive_job_in_some_way()
+
+case AwsExRay.Trace.parse(job.trace) do
+  {:ok, trace}
+    AwsExRay.start_tracing(trace, "internal-job-name")
+    :ok
+
+  {:error, :not_found} ->
+    :ok
+end
+```
+
+## Configuration
+
+```elixir
+config :aws_ex_ray,
+  sampling_rate: 0.1,
+  default_annotation: %{foo: "bar"},
+  default_metadata: %{bar: "buz"}
+```
+
+|key|default|description|
+|:--|:--|:--|
+|sampling_rate|0.1|set number between 0.0 - 1.0. recommended that set 0.0 for 'test' environment|
+|default_annotation|%{}|annotation parameters automatically put into segment/subsegment|
+|default_metadata|%{}|metadata parameters automatically put into segment/subsegment|
+|daemon_address|127.0.0.1|your xray daemon's IP address. typically, you don't need customize this.|
+|daemon_port|2000|your xray daemon's port. typically, you don't need customize this.|
+|default_client_pool_size|10|number of UDP client which connects to xray daemon|
+|default_client_pool_overflow|100|overflow capacity size of UDP client|
+|default_store_monitor_pool_size|10|number of tracing-process-monitor|
+
+## Support Libraries
+
+### Plug Support
 
 https://github.com/lyokato/aws_ex_ray_plug
 
@@ -69,7 +235,9 @@ defmodule MyPlugRouter do
 end
 ```
 
-## Ecto Support
+Then automatically start tracing segment if the request is not included skip setting.
+
+### Ecto Support
 
 https://github.com/lyokato/aws_ex_ray_ecto
 
@@ -87,7 +255,9 @@ config :my_app, MyApp.EctoRepo,
   loggers:  [Ecto.LogEntry, AwsExRay.Ecto.Logger]
 ```
 
-## HTTPoison Support
+Then automatically record subsegment if queries called on the tracing process.
+
+### HTTPoison Support
 
 https://github.com/lyokato/aws_ex_ray_httpoison
 
@@ -97,7 +267,9 @@ use `AwsExRay.HTTPoison` instead of `HTTPoison`
 result = AwsExRay.HTTPoison.get! "http://httparrot.herokuapp.com/get"
 ```
 
-## ExAws Support
+Then automatically record subsegment if HTTP request called on the tracing process.
+
+### ExAws Support
 
 https://github.com/lyokato/aws_ex_ray_ex_aws
 
@@ -109,3 +281,12 @@ config :ex_aws,
   http_client: AwxExRay.ExAws.HTTPClient
 ```
 
+Then automatically record subsegment if HTTP request toward AWS-Services called on the tracing process.
+
+## LICENSE
+
+MIT-LICENSE
+
+## Author
+
+Lyo Kaot <lyo.kato __at__ gmail.com>
