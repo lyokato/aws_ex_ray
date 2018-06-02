@@ -283,7 +283,7 @@ https://github.com/lyokato/aws_ex_ray_httpoison
 use `AwsExRay.HTTPoison` instead of `HTTPoison`
 
 ```elixir
-result = AwsExRay.HTTPoison.get! "http://httparrot.herokuapp.com/get"
+result = AwsExRay.HTTPoison.get! "https://example.org/"
 ```
 
 Then automatically record subsegment if HTTP request called on the tracing process.
