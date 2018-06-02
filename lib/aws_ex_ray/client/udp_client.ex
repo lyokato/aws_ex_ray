@@ -5,12 +5,9 @@ defmodule AwsExRay.Client.UDPClient do
   use GenServer
 
   @moduledoc """
-  This is a UDP client module which reports TRACE information to a XRay daemon
+  This is a UDP client module which reports TRACE information to xray-daemon
   running on localhost.
   """
-
-  #@daemon_version "1.2.3"
-
   @max_retry 10
 
   @header "{\"format\": \"json\", \"version\": 1}\n"
@@ -19,14 +16,18 @@ defmodule AwsExRay.Client.UDPClient do
             port:    2000,
             socket:  nil
 
+  @spec send(pid, binary) :: :ok
   def send(client, data) do
     GenServer.call(client, {:send, data})
+    :ok
   end
 
+  @spec start_link(keyword) :: GenServer.on_start
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts)
   end
 
+  @impl GenServer
   def init(opts) do
 
     address = Keyword.fetch!(opts, :address)
@@ -50,10 +51,12 @@ defmodule AwsExRay.Client.UDPClient do
 
   end
 
+  @impl GenServer
   def handle_info({:EXIT, _pid, _reason}, state) do
     {:stop, :normal, state}
   end
 
+  @impl GenServer
   def handle_call({:send, data}, _from, state) do
     case send_data(data, state) do
       :ok ->
@@ -64,6 +67,7 @@ defmodule AwsExRay.Client.UDPClient do
     end
   end
 
+  @impl GenServer
   def terminate(_reason, state) do
     :gen_udp.close(state.socket)
     :ok
@@ -89,7 +93,7 @@ defmodule AwsExRay.Client.UDPClient do
   end
 
   defp get_port() do
-    :rand.uniform(65535 - 1023) + 1023
+    :rand.uniform(65_535 - 1023) + 1023
   end
 
   defp send_data(data, state) do

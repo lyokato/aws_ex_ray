@@ -1,6 +1,20 @@
 defmodule AwsExRay.Record.HTTPRequest do
 
+  @moduledoc ~S"""
+  This module provides a data structure which represents **http.request** report.
+  """
+
   @type segment_type :: :segment | :subsegment
+
+  @type t :: %__MODULE__{
+    segment_type:    segment_type,
+    method:          String.t | atom,
+    url:             String.t,
+    user_agent:      String.t,
+    client_ip:       String.t,
+    x_forwarded_for: boolean, # segment only
+    traced:          boolean  # subsegment only
+  }
 
   defstruct segment_type:    :segment,
             method:          nil,
@@ -10,6 +24,7 @@ defmodule AwsExRay.Record.HTTPRequest do
             x_forwarded_for: false, # segment only
             traced:          false  # subsegment only
 
+  @spec to_map(%__MODULE__{}) :: map
   def to_map(req) do
 
     m = [:method, :url, :user_agent, :client_ip]

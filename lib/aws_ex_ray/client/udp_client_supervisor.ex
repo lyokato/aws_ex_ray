@@ -1,5 +1,10 @@
 defmodule AwsExRay.Client.UDPClientSupervisor do
 
+  @moduledoc ~S"""
+  Supervise some UDP client (GenServer) for xray-daemon with poolboy.
+  You con configure the number of pool-size and overflow. See also AwsExRay.Config.
+  """
+
   use Supervisor
 
   alias AwsExRay.Config

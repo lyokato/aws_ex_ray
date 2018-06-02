@@ -1,6 +1,11 @@
 defmodule AwsExRay.Trace do
 
+  @moduledoc ~S"""
+  This module provides data structure which represents X-Ray's **trace**
+  """
+
   alias AwsExRay.Config
+  alias AwsExRay.Trace
   alias AwsExRay.Trace.Formatter
   alias AwsExRay.Util
 
@@ -14,7 +19,7 @@ defmodule AwsExRay.Trace do
             sampled:  true,
             parent:   ""
 
-  @spec new() :: %__MODULE__{}
+  @spec new() :: t
   def new() do
     %__MODULE__{
       root:    Util.generate_trace_id(),
@@ -27,7 +32,7 @@ defmodule AwsExRay.Trace do
     trace_id :: String.t,
     sampled  :: boolean,
     parent   :: String.t
-  ) :: %__MODULE__{}
+  ) :: t
   def with_params(trace_id, sampled, parent) do
     %__MODULE__{
       root:     trace_id,
@@ -40,7 +45,10 @@ defmodule AwsExRay.Trace do
     :rand.uniform() <= Config.sampling_rate
   end
 
+  @spec parse(String.t) :: {:ok, Trace.t} | {:error, :not_found}
   def parse(value), do: Formatter.parse(value)
+
+  @spec to_string(t) :: String.t
   def to_string(trace), do: Formatter.to_string(trace)
 
 end
@@ -49,7 +57,7 @@ defimpl String.Chars, for: AwsExRay.Trace do
 
   alias AwsExRay.Trace
 
-  def to_string(%Trace{}=trace) do
+  def to_string(%Trace{} = trace) do
     Trace.to_string(trace)
   end
 
