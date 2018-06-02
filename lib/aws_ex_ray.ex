@@ -130,12 +130,23 @@ defmodule AwsExRay do
   You can directory pass **Trace** value
 
   ```elixir
-  trace_value = #{segment.trace}
 
-  pass_job_in_some_way(%{
-    your_job_data: ...
-    trace: trace_value
-  })
+  case AwsExRay.start_subsegment("internal-api-request", namespace: :remote) do
+
+    {:error, :out_of_xray} ->
+      pass_job_in_some_way(%{
+        your_job_data: ...
+      })
+
+    {:ok, subsegment} ->
+      trace_value = AwsExRay.generate_trace_value(subsegment)
+      pass_job_in_some_way(%{
+        your_job_data: ...
+        trace_value: Subsegment.generate_trace_value(subsegment)
+      })
+      AwsExRay.finish_subsegment(subsegment)
+
+  end
   ```
 
   And job worker side, it can take over the **Trace**
@@ -143,7 +154,7 @@ defmodule AwsExRay do
   ```elixir
   job = receive_job_in_some_way()
 
-  case AwsExRay.Trace.parse(job.trace) do
+  case AwsExRay.Trace.parse(job.trace_value) do
     {:ok, trace}
       AwsExRay.start_tracing(trace, "internal-job-name")
       :ok
