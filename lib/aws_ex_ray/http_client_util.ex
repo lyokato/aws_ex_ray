@@ -1,10 +1,20 @@
 defmodule AwsExRay.HTTPClientUtil do
 
+  @moduledoc """
+  This module provides some utility functions for HTTP client
+  """
+
   alias AwsExRay.Record.Error
   alias AwsExRay.Record.Error.Cause
+  alias AwsExRay.Segment
   alias AwsExRay.Subsegment
   alias AwsExRay.Util
 
+  @spec put_response_error(
+    seg    :: Segment.t,
+    status :: integer,
+    stack  :: list
+  ) :: Segment.t
   def put_response_error(seg, status, stack) do
     case status do
 
@@ -48,41 +58,49 @@ defmodule AwsExRay.HTTPClientUtil do
     end
   end
 
+  @spec get_user_agent(keyword) :: String.t
   def get_user_agent(headers) do
     Util.get_header(headers, "user-agent")
   end
 
+  @spec get_response_content_length(keyword) :: integer
   def get_response_content_length(headers) do
-    Util.get_header(headers, "content-length", "0") |> String.to_integer()
+    headers |> Util.get_header("content-length", "0") |> String.to_integer()
   end
 
+  @spec put_tracing_header(keyword, Subsegment.t) :: keyword
   def put_tracing_header(headers, subsegment) do
     value = Subsegment.generate_trace_value(subsegment)
     [{"X-Amzn-Trace-Id", value}|headers]
   end
 
+  @spec find_tracing_name(keyword, String.t) :: String.t
   def find_tracing_name(headers, url) do
-    headers = headers |> Map.new(&{elem(&1,0), elem(&1,1)})
-    case Map.get(headers, "X-Aws-Xray-Name") do
-
-      nil ->
-        case Map.get(headers, "Host") do
-
-          nil ->
-            parsed = URI.parse(url)
-            if parsed.host == nil do
-              to_string(__MODULE__)
-            else
-              parsed.host
-            end
-
-          host -> host
+    name = Util.get_header(headers, "x-aws-xray-name")
+    if name != "" do
+      name
+    else
+      name = Util.get_header(headers, "host")
+      if name != "" do
+        name
+      else
+        name = find_host(url)
+        if name != "" do
+          name
+        else
+          to_string(__MODULE__)
         end
-
-      name -> name
-
+      end
     end
+  end
 
+  defp find_host(url) do
+    parsed = URI.parse(url)
+    if parsed != nil && parsed.host != nil do
+      parsed.host
+    else
+      ""
+    end
   end
 
 end

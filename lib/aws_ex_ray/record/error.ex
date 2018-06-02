@@ -1,6 +1,18 @@
 defmodule AwsExRay.Record.Error do
 
+  @moduledoc ~S"""
+  This module provides a data structure which represents **error** report.
+  """
+
   alias AwsExRay.Record.Error.Cause
+
+  @type t :: %__MODULE__{
+    error:    boolean,
+    throttle: boolean,
+    fault:    boolean,
+    remote:   boolean,
+    cause:    Cause.t
+  }
 
   defstruct error:    false,
             throttle: false,
@@ -8,6 +20,7 @@ defmodule AwsExRay.Record.Error do
             remote:   false,
             cause:    nil
 
+  @spec to_map(err :: t) :: map
   def to_map(err) do
     %{
       error:    err.error,

@@ -1,7 +1,12 @@
 defmodule AwsExRay.Application do
 
+  @moduledoc """
+  Application module which starts aws_ex_ray's root supervisor
+  """
+
   use Application
 
+  @impl Application
   def start(_type, _args) do
 
     AwsExRay.Store.Table.init()

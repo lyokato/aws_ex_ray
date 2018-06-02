@@ -174,7 +174,10 @@ defmodule AwsExRay do
   alias AwsExRay.Trace
   alias AwsExRay.Util
 
-  @spec start_tracing(trace :: Trace.t, name :: String.t) :: Segment.t
+  @spec start_tracing(
+    trace :: Trace.t,
+    name  :: String.t
+  ) :: Segment.t
 
   def start_tracing(trace, name) do
 
@@ -187,7 +190,7 @@ defmodule AwsExRay do
 
   end
 
-  @spec finish_tracing(segment :: Sugment.t) :: :ok
+  @spec finish_tracing(segment :: Segment.t) :: :ok
 
   def finish_tracing(segment) do
 
@@ -206,9 +209,12 @@ defmodule AwsExRay do
 
   end
 
-  @spec start_subsegment(name :: String.t, opts :: keyword)
-    :: {:ok, Subsegment.t}
-     | {:error, :out_of_xray}
+  @spec start_subsegment(
+    name :: String.t,
+    opts :: keyword
+  ) :: {:ok, Subsegment.t}
+    |  {:error, :out_of_xray}
+
   def start_subsegment(name, opts \\ []) do
 
     ns  = Keyword.get(opts, :namespace, :none)
@@ -227,7 +233,10 @@ defmodule AwsExRay do
     end
   end
 
-  @spec finish_subsegment(subsegment :: Subsegment.t, end_time :: number) :: :ok
+  @spec finish_subsegment(
+    subsegment :: Subsegment.t,
+    end_time   :: number
+  ) :: :ok
 
   def finish_subsegment(subsegment, end_time \\ Util.now()) do
 

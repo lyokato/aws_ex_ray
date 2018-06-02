@@ -1,4 +1,5 @@
 defmodule AwsExRay.Client.Sandbox do
+  @moduledoc nil
 
   use GenServer
 

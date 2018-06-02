@@ -1,16 +1,22 @@
   defmodule AwsExRay.Subsegment.Formatter do
 
+    @moduledoc ~S"""
+    This module provides a formatter functions
+    for subsegment record
+    """
+
     alias AwsExRay.Record.SQL
 
     def to_json(seg) do
-      to_map(seg) |> Poison.encode!()
+      seg |> to_map() |> Poison.encode!()
     end
 
     def to_map(seg) do
 
       m = AwsExRay.Segment.Formatter.to_map(seg.segment)
 
-      Map.put(m, :type, "subsegment")
+      m
+      |> Map.put(:type, "subsegment")
       |> embed_namespace(seg)
       |> embed_sql(seg)
       |> embed_aws(seg)

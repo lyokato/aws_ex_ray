@@ -4,7 +4,7 @@ defmodule AwsExRay.MixProject do
   def project do
     [
       app: :aws_ex_ray,
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.6",
       package: package(),
       start_permanent: Mix.env() == :prod,
@@ -26,6 +26,7 @@ defmodule AwsExRay.MixProject do
   defp deps do
     [
       {:mox, "~> 0.3.2", only: :test},
+      {:credo, "~> 0.3", only: :dev, runtime: false},
       {:ex_doc, "~> 0.15", only: :dev, runtime: false},
       {:poison, "~> 3.1"},
       {:poolboy, "~> 1.5"},
