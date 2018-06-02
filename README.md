@@ -38,6 +38,14 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/aws_ex_ray](https://hexdocs.pm/aws_ex_ray).
 
+## Preparation
+
+Setup your AWS environment.
+
+Run `xray` daemon on an EC2 instance which you want your application run on.
+
+https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html
+
 ## USAGE
 
 ```elixir
@@ -130,7 +138,7 @@ end)
 ```
 
 You can tracking **Trace** including (2) not only (1).
-If (2) server is HTTP server. You can put *X-Amzn-Trace-Id* into your requests HTTP headers.
+If (2) server is HTTP server. You can put **X-Amzn-Trace-Id** into your requests HTTP headers.
 
 ### calling internal api on (1)
 
@@ -196,8 +204,8 @@ config :aws_ex_ray,
 |sampling_rate|0.1|set number between 0.0 - 1.0. recommended that set 0.0 for 'test' environment|
 |default_annotation|%{}|annotation parameters automatically put into segment/subsegment|
 |default_metadata|%{}|metadata parameters automatically put into segment/subsegment|
-|daemon_address|127.0.0.1|your xray daemon's IP address. typically, you don't need customize this.|
-|daemon_port|2000|your xray daemon's port. typically, you don't need customize this.|
+|daemon_address|127.0.0.1|your xray daemon's IP address. typically, you don't need to customize this.|
+|daemon_port|2000|your xray daemon's port. typically, you don't need to customize this.|
 |default_client_pool_size|10|number of UDP client which connects to xray daemon|
 |default_client_pool_overflow|100|overflow capacity size of UDP client|
 |default_store_monitor_pool_size|10|number of tracing-process-monitor|

@@ -1,6 +1,15 @@
 defmodule AwsExRay do
 
   @moduledoc """
+
+  ## Preparation
+
+  Setup your AWS environment.
+
+  Run `xray` daemon on an EC2 instance which you want your application run on.
+
+  https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html
+
   ## USAGE
 
   ```elixir
