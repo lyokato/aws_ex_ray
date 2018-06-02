@@ -1,6 +1,6 @@
 # AwsExRay
 
-## NOT STABLE YES
+## NOT STABLE YET
 
 Please wait version 1.0.0 released.
 
