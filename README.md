@@ -106,7 +106,7 @@ end)
 ```
 The solution.
 
-Call `AwsExRay.Process.keep_tracing( process_which_starts_tracing)` like following
+Call `AwsExRay.Process.keep_tracing(process_which_starts_tracing)` like following
 
 ```elixir
 segment = AwsExRay.start_tracing(trace, "root_segment_name")
@@ -151,7 +151,7 @@ result = AwsExRay.HTTPoison.get(url, headers, options)
 
 ### received internal request on (2)
 
-If you use AwsExRay.Plug, automatically continue tracing.
+If you setup AwsExRay.Plug, it automatically takes over tracing.
 
 ```elixir
 defmodule MyInternalAPIRouter do
