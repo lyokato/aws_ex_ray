@@ -1,5 +1,9 @@
 defmodule AwsExRay.Record.SQL do
 
+  @moduledoc ~S"""
+  This module provides a data structure which represents **sql** report.
+  """
+
   @type t :: %__MODULE__{
     url:               String.t,
     database_version:  String.t,
@@ -18,6 +22,7 @@ defmodule AwsExRay.Record.SQL do
             driver_version:    nil,
             preparation:       nil
 
+  @spec to_map(sql :: t) :: map
   def to_map(sql) do
     [
       :url,

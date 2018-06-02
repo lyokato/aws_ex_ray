@@ -2,6 +2,8 @@ Mox.defmock(AwsExRay.Client.Sandbox.Sink.Stub, for: AwsExRay.Client.Sandbox.Sink
 
 defmodule AwsExRay.Test.Mox do
 
+  @moduledoc nil
+
   import Mox
 
   def setup_default() do

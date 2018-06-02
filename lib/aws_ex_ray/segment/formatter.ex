@@ -1,12 +1,17 @@
   defmodule AwsExRay.Segment.Formatter do
 
+    @moduledoc ~S"""
+    This module provides a formatter functions
+    for segment record
+    """
+
     alias AwsExRay.Segment
     alias AwsExRay.Record.Error
     alias AwsExRay.Record.HTTPRequest
     alias AwsExRay.Record.HTTPResponse
 
     def to_json(seg) do
-      to_map(seg) |> Poison.encode!()
+      seg |> to_map() |> Poison.encode!()
     end
 
     def to_map(seg) do
