@@ -52,7 +52,7 @@ defmodule AwsExRay do
   Task.Supervisor.start_child(MyTaskSupervisor, fn ->
 
     ####################################################################
-    # this function is executed on different process as root-segemnet!!!
+    # this function is executed on different process as root-segment!!!
     ####################################################################
 
     current_trace = AwsExRay.start_subsegment("subsegment-name")
