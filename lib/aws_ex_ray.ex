@@ -10,7 +10,7 @@ defmodule AwsExRay do
   AwsExRay.finish_tracing(segment)
   ```
 
-  ```
+  ```elixir
   def do_your_job() do
 
     current_trace = AwsExRay.start_subsegment("subsegment-name")
