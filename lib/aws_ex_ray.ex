@@ -1,6 +1,6 @@
 defmodule AwsExRay do
 
-  @moduledoc """
+  @moduledoc ~S"""
 
   ## Preparation
 
@@ -141,7 +141,6 @@ defmodule AwsExRay do
   And job worker side, it can take over the **Trace**
 
   ```elixir
-
   job = receive_job_in_some_way()
 
   case AwsExRay.Trace.parse(job.trace) do
@@ -197,8 +196,8 @@ defmodule AwsExRay do
 
   end
 
-  @spec start_subsegment(name :: String.t, opts :: keywords)
-    :: {:ok, subsegment}
+  @spec start_subsegment(name :: String.t, opts :: keyword)
+    :: {:ok, Subsegment.t}
      | {:error, :out_of_xray}
   def start_subsegment(name, opts \\ []) do
 

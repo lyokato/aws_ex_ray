@@ -44,3 +44,13 @@ defmodule AwsExRay.Trace do
   def to_string(trace), do: Formatter.to_string(trace)
 
 end
+
+defimpl String.Chars, for: AwsExRay.Trace do
+
+  alias AwsExRay.Trace
+
+  def to_string(%Trace{}=trace) do
+    Trace.to_string(trace)
+  end
+
+end
