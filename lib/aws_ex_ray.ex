@@ -139,7 +139,6 @@ defmodule AwsExRay do
       })
 
     {:ok, subsegment} ->
-      trace_value = AwsExRay.generate_trace_value(subsegment)
       pass_job_in_some_way(%{
         your_job_data: ...
         trace_value: Subsegment.generate_trace_value(subsegment)
