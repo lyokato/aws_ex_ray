@@ -86,6 +86,13 @@
       Map.put(seg, :error, error)
     end
 
+    @spec generate_trace_value(seg :: t) :: String.t
+    def generate_trace_value(seg) do
+      trace = seg.trace
+      trace = %{trace|parent: seg.id}
+      Trace.to_string(trace)
+    end
+
     @spec sampled?(seg :: t) :: boolean
     def sampled?(seg) do
       seg.trace.sampled

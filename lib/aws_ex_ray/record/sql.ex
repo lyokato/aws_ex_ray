@@ -5,13 +5,13 @@ defmodule AwsExRay.Record.SQL do
   """
 
   @type t :: %__MODULE__{
-    url:               String.t,
-    database_version:  String.t,
-    database_type:     String.t,
-    sanitized_query:   String.t,
-    connection_string: String.t,
-    driver_version:    String.t,
-    preparation:       String.t
+    url:               String.t | nil,
+    database_version:  String.t | nil,
+    database_type:     String.t | nil,
+    sanitized_query:   String.t | nil,
+    connection_string: String.t | nil,
+    driver_version:    String.t | nil,
+    preparation:       String.t | nil
   }
 
   defstruct url:               nil,
