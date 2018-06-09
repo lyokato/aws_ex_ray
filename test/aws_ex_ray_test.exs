@@ -115,19 +115,25 @@ defmodule AwsExRayTest do
 
     {:ok, trace} = Trace.parse("Root=root1;Parent=parent1;Sampled=1")
 
-    AwsExRay.trace(trace, "SimpleWay", fn ->
+    result = AwsExRay.trace(trace, "SimpleWay", fn ->
 
       Process.sleep(10)
 
-      AwsExRay.subsegment("SimpleSub", [namespace: :none], fn ->
+      sub_result = AwsExRay.subsegment("SimpleSub", [namespace: :none], fn ->
 
         Process.sleep(10)
+
+        1
 
       end)
 
       Process.sleep(10)
 
+      sub_result + 2
+
     end)
+
+    assert result == 3
 
     [s1, s2] = agent |> MockedSink.get() |> Enum.map(&Poison.decode!/1)
 
