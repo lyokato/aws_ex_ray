@@ -67,8 +67,13 @@ defmodule AwsExRay.Process do
 
     case Store.Table.lookup(tracing_pid) do
 
-      {:ok, trace, segment_id} ->
+      {:ok, trace, segment_id, []} ->
         Store.Table.insert(trace, segment_id)
+        Store.MonitorSupervisor.start_monitoring(self())
+        :ok
+
+      {:ok, trace, _segment_id, [current_id|_rest]} ->
+        Store.Table.insert(trace, current_id)
         Store.MonitorSupervisor.start_monitoring(self())
         :ok
 

@@ -33,7 +33,6 @@ defmodule AwsExRay do
       {:error, :out_of_xray} -> :ok # you need to do nothing.
     end
 
-    AwsExRay.finish_subsegment(subsegment)
   end
   ```
 
@@ -163,6 +162,75 @@ defmodule AwsExRay do
   end
   ```
 
+  ## More Simple Inteface
+
+  If you don't need to put detailed parameters into segment/subsegment,
+  You can do like following
+
+  ### Segment
+
+  ```elixir
+  trace = Trace.new()
+  result = AwsExRay.trace(trace, "root_segment_name", fn ->
+    do_your_job()
+  end)
+  ```
+
+  This is same as,
+
+  ```elixir
+  AwsExRay.finish_tracing(segment)
+  segment = AwsExRay.start_tracing(trace, "root_segment_name")
+  result = do_your_job()
+  AwsExRay.finish_tracing(segment)
+  result
+  ```
+
+  This way supports just only `annotations`
+
+  ```elixir
+  trace = Trace.new()
+  result = AwsExRay.trace(trace, "root_segment_name", %{"MyAnnotationKey" => "MyAnnotationValue"}, fn ->
+    do_your_job()
+  end)
+  ```
+
+  ### Subsegment
+
+  ```elixir
+  opts = [namespace: :none]
+  result = AwsExRay.subsegment("name", opts, fn ->
+    do_your_job()
+  end)
+  ```
+
+  This is same as,
+
+  ```elixir
+  current_trace = AwsExRay.start_subsegment("subsegment-name")
+
+  result = do_some_work()
+
+  case current_trace do
+    {:ok, subsegment} ->
+      AwsExRay.finish_subsegment(subsegment)
+
+    {:error, :out_of_xray} -> :ok # you need to do nothing.
+  end
+
+  result
+  ```
+
+  This way supports just only `annotations`
+
+  ```elixir
+  opts = [namespace: :none]
+  result = AwsExRay.subsegment("name", %{"MyAnnotationKey" => "MyAnnotationValue"}, opts, fn ->
+    do_your_job()
+  end)
+  ```
+
+
   """
 
   require Logger
@@ -181,12 +249,18 @@ defmodule AwsExRay do
 
   def start_tracing(trace, name) do
 
-    segment = Segment.new(trace, name)
+    case Store.Table.lookup() do
 
-    Store.Table.insert(trace, segment.id)
-    Store.MonitorSupervisor.start_monitoring(self())
+      {:error, :not_found} ->
+        segment = Segment.new(trace, name)
+        Store.Table.insert(trace, segment.id)
+        Store.MonitorSupervisor.start_monitoring(self())
+        segment
 
-    segment
+      {:ok, _, _, _} ->
+        raise "<AwsExRay> Tracing Context already exists on this process."
+
+    end
 
   end
 
@@ -205,9 +279,37 @@ defmodule AwsExRay do
 
     end
 
+    Store.Table.delete()
+
     :ok
 
   end
+
+  @spec trace(
+    trace       :: Trace.t,
+    name        :: String.t,
+    annotations :: map,
+    func        :: fun
+  ) :: any
+  def trace(trace, name, annotations, func) do
+    segment = start_tracing(trace, name)
+    segment = annotations
+            |> Enum.reduce(segment, fn {key, value}, seg ->
+              Segment.add_annotation(seg, key, value)
+            end)
+    try do
+      func.()
+    after
+      finish_tracing(segment)
+    end
+  end
+
+  @spec trace(
+    trace :: Trace.t,
+    name  :: String.t,
+    func  :: fun
+  ) :: any
+  def trace(trace, name, func), do: trace(trace, name, %{}, func)
 
   @spec start_subsegment(
     name :: String.t,
@@ -217,20 +319,45 @@ defmodule AwsExRay do
 
   def start_subsegment(name, opts \\ []) do
 
-    ns  = Keyword.get(opts, :namespace, :none)
-    pid = Keyword.get(opts, :tracing_pid, self())
+    tracing_pid = Keyword.get(opts, :tracing_pid)
+    {target_pid, update_table} =
+      if tracing_pid == nil do
+        {self(), true}
+      else
+        {tracing_pid, false}
+      end
 
-    case Store.Table.lookup(pid) do
+    ns = Keyword.get(opts, :namespace, :none)
 
-      {:ok, trace, segment_id} ->
-        subsegment = %{trace|parent: segment_id}
-                   |> Subsegment.new(name, ns)
+    case Store.Table.lookup(target_pid) do
+
+      {:ok, trace, segment_id, []} ->
+        subsegment =
+          setup_subsegment(trace, name, ns, segment_id, update_table)
+        {:ok, subsegment}
+
+      {:ok, trace, _segment_id, [current_id|_rest]} ->
+        subsegment =
+          setup_subsegment(trace, name, ns, current_id, update_table)
         {:ok, subsegment}
 
       {:error, :not_found} ->
         {:error, :out_of_xray}
 
     end
+  end
+
+  defp setup_subsegment(trace, name, ns, parent_id, update_table) do
+    subsegment = %{trace|parent: parent_id}
+               |> Subsegment.new(name, ns)
+
+    if update_table do
+      subsegment
+      |> Subsegment.id()
+      |> Store.Table.push_subsegment()
+    end
+
+    subsegment
   end
 
   @spec finish_subsegment(
@@ -251,8 +378,43 @@ defmodule AwsExRay do
 
     end
 
+    subsegment
+    |> Subsegment.id()
+    |> Store.Table.pop_subsegment()
+
     :ok
 
   end
+
+  @spec subsegment(
+    name        :: String.t,
+    annotations :: map,
+    opts        :: keyword,
+    func        :: fun
+  ) :: :ok
+  def subsegment(name, annotations, opts, func) do
+    subsegment_state = start_subsegment(name, opts)
+    try do
+      func.()
+    after
+      case subsegment_state do
+        {:ok, subsegment} ->
+          subsegment = annotations
+                     |> Enum.reduce(subsegment, fn {key, value}, seg ->
+                       Subsegment.add_annotation(seg, key, value)
+                     end)
+          finish_subsegment(subsegment)
+        {:error, :out_of_xray} ->
+          :ok
+      end
+    end
+  end
+
+  @spec subsegment(
+    name :: String.t,
+    opts :: keyword,
+    func :: fun
+  ) :: :ok
+  def subsegment(name, opts, func), do: subsegment(name, %{}, opts, func)
 
 end

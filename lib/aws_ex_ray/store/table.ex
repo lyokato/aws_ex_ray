@@ -16,11 +16,12 @@ defmodule AwsExRay.Store.Table do
   end
 
   @spec insert(
-    trace      :: Trace.t,
-    segment_id :: String.t
+    trace       :: Trace.t,
+    segment_id  :: String.t,
+    subsegments :: list
   ) :: :ok
-  def insert(trace, segment_id) do
-    :ets.insert(@table, {self(), trace, segment_id})
+  def insert(trace, segment_id, subsegments \\ []) do
+    :ets.insert(@table, {self(), trace, segment_id, subsegments})
     :ok
   end
 
@@ -41,8 +42,34 @@ defmodule AwsExRay.Store.Table do
 
       [] -> {:error, :not_found}
 
-      [{_pid, trace, segment_id}|_] ->
-        {:ok, trace, segment_id}
+      [{_pid, trace, segment_id, subsegments}|_] ->
+        {:ok, trace, segment_id, subsegments}
+
+    end
+  end
+
+  @spec push_subsegment(String.t) :: :ok
+  def push_subsegment(subsegment_id) do
+    case lookup() do
+
+      {:error, :not_found} -> :ok
+
+      {:ok, trace, segment_id, subsegments} ->
+        insert(trace, segment_id, [subsegment_id|subsegments])
+
+    end
+  end
+
+  @spec pop_subsegment(String.t) :: :ok
+  def pop_subsegment(subsegment_id) do
+    case lookup() do
+
+      {:error, :not_found} -> :ok
+
+      {:ok, trace, segment_id, subsegments} ->
+        insert(trace,
+               segment_id,
+               List.delete(subsegments, subsegment_id))
 
     end
   end
