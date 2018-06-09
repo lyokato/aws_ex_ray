@@ -41,6 +41,9 @@
       }
     end
 
+    @spec id(seg :: t) :: String.t
+    def id(seg), do: seg.segment.id
+
     @spec add_annotation(
       seg   :: t,
       key   :: atom | String.t,

@@ -30,6 +30,7 @@ defmodule AwsExRay.MixProject do
       {:ex_doc, "~> 0.15", only: :dev, runtime: false},
       {:poison, "~> 3.1"},
       {:poolboy, "~> 1.5"},
+      {:struct_assert, "~> 0.5.2", only: :test},
       {:secure_random, "~> 0.5"}
     ]
   end
