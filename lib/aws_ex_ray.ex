@@ -319,19 +319,26 @@ defmodule AwsExRay do
 
   def start_subsegment(name, opts \\ []) do
 
-    ns  = Keyword.get(opts, :namespace, :none)
-    pid = Keyword.get(opts, :tracing_pid, self())
+    tracing_pid = Keyword.get(opts, :tracing_pid)
+    {target_pid, update_table} =
+      if tracing_pid == nil do
+        {self(), true}
+      else
+        {tracing_pid, false}
+      end
 
-    case Store.Table.lookup(pid) do
+    ns = Keyword.get(opts, :namespace, :none)
+
+    case Store.Table.lookup(target_pid) do
 
       {:ok, trace, segment_id, []} ->
         subsegment =
-          setup_subsegment(trace, name, ns, segment_id)
+          setup_subsegment(trace, name, ns, segment_id, update_table)
         {:ok, subsegment}
 
       {:ok, trace, _segment_id, [current_id|_rest]} ->
         subsegment =
-          setup_subsegment(trace, name, ns, current_id)
+          setup_subsegment(trace, name, ns, current_id, update_table)
         {:ok, subsegment}
 
       {:error, :not_found} ->
@@ -340,13 +347,15 @@ defmodule AwsExRay do
     end
   end
 
-  defp setup_subsegment(trace, name, ns, parent_id) do
+  defp setup_subsegment(trace, name, ns, parent_id, update_table) do
     subsegment = %{trace|parent: parent_id}
                |> Subsegment.new(name, ns)
 
-    subsegment
-    |> Subsegment.id()
-    |> Store.Table.push_subsegment()
+    if update_table do
+      subsegment
+      |> Subsegment.id()
+      |> Store.Table.push_subsegment()
+    end
 
     subsegment
   end
