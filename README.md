@@ -199,7 +199,7 @@ case AwsExRay.Trace.parse(job.trace_value) do
 end
 ```
 
-## More Simple Inteface
+## More Simple Interface
 
 If you don't need to put detailed parameters into segment/subsegment,
 You can do like following

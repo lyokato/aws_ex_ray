@@ -162,7 +162,7 @@ defmodule AwsExRay do
   end
   ```
 
-  ## More Simple Inteface
+  ## More Simple Interface
 
   If you don't need to put detailed parameters into segment/subsegment,
   You can do like following
