@@ -37,6 +37,8 @@ defmodule AwsExRay.Trace.Formatter do
 
   end
 
+  defp parse_to_map(nil), do: %{}
+  defp parse_to_map(""), do: %{}
   defp parse_to_map(header) do
 
     header
@@ -60,7 +62,7 @@ defmodule AwsExRay.Trace.Formatter do
   defp add_parent_if_needed(value, ""), do: value
   defp add_parent_if_needed(value, parent), do: value <> ";Parent=#{parent}"
 
-  defp add_sampled_if_needed(value, false), do: value
+  defp add_sampled_if_needed(value, false), do: value <> ";Sampled=0"
   defp add_sampled_if_needed(value, true), do: value <> ";Sampled=1"
 
 end

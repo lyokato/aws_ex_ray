@@ -69,7 +69,6 @@ def do_your_job() do
     {:error, :out_of_xray} -> :ok # you need to do nothing.
   end
 
-  AwsExRay.finish_subsegment(subsegment)
 end
 ```
 
@@ -198,6 +197,74 @@ case AwsExRay.Trace.parse(job.trace_value) do
   {:error, :not_found} ->
     :ok
 end
+```
+
+## More Simple Inteface
+
+If you don't need to put detailed parameters into segment/subsegment,
+You can do like following
+
+### Segment
+
+```elixir
+trace = Trace.new()
+result = AwsExRay.trace(trace, "root_segment_name", fn ->
+  do_your_job()
+end)
+```
+
+This is same as,
+
+```elixir
+AwsExRay.finish_tracing(segment)
+segment = AwsExRay.start_tracing(trace, "root_segment_name")
+result = do_your_job()
+AwsExRay.finish_tracing(segment)
+result
+```
+
+This way supports just only `annotations`
+
+```elixir
+trace = Trace.new()
+result = AwsExRay.trace(trace, "root_segment_name", %{"MyAnnotationKey" => "MyAnnotationValue"}, fn ->
+  do_your_job()
+end)
+```
+
+### Subsegment
+
+```elixir
+opts = [namespace: :none]
+result = AwsExRay.subsegment("name", opts, fn ->
+  do_your_job()
+end)
+```
+
+This is same as,
+
+```elixir
+current_trace = AwsExRay.start_subsegment("subsegment-name")
+
+result = do_some_work()
+
+case current_trace do
+  {:ok, subsegment} ->
+    AwsExRay.finish_subsegment(subsegment)
+
+  {:error, :out_of_xray} -> :ok # you need to do nothing.
+end
+
+result
+```
+
+This way supports just only `annotations`
+
+```elixir
+opts = [namespace: :none]
+result = AwsExRay.subsegment("name", %{"MyAnnotationKey" => "MyAnnotationValue"}, opts, fn ->
+  do_your_job()
+end)
 ```
 
 ## Configuration
