@@ -41,7 +41,7 @@ defmodule AwsExRay.MixProject do
       licenses: ["MIT"],
       links: %{
         "Github" => "https://github.com/lyokato/aws_ex_ray",
-        "Docs" => "https://hexdocs.pm/aws_ex_ray"
+        "Docs" => "https://hexdocs.pm/aws_ex_ray/AwsExRay.html"
       },
       maintainers: ["Lyo Kato"]
     ]

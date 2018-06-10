@@ -292,11 +292,9 @@ defmodule AwsExRay do
     func        :: fun
   ) :: any
   def trace(trace, name, annotations, func) do
-    segment = start_tracing(trace, name)
-    segment = annotations
-            |> Enum.reduce(segment, fn {key, value}, seg ->
-              Segment.add_annotation(seg, key, value)
-            end)
+    segment = trace
+            |> start_tracing(name)
+            |> Segment.add_annotations(annotations)
     try do
       func.()
     after
@@ -398,14 +396,15 @@ defmodule AwsExRay do
       func.()
     after
       case subsegment_state do
+
         {:ok, subsegment} ->
-          subsegment = annotations
-                     |> Enum.reduce(subsegment, fn {key, value}, seg ->
-                       Subsegment.add_annotation(seg, key, value)
-                     end)
-          finish_subsegment(subsegment)
+          subsegment
+          |> Subsegment.add_annotations(annotations)
+          |> finish_subsegment()
+
         {:error, :out_of_xray} ->
           :ok
+
       end
     end
   end
