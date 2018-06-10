@@ -236,7 +236,8 @@ end)
 
 ```elixir
 opts = [namespace: :none]
-result = AwsExRay.subsegment("name", opts, fn ->
+result = AwsExRay.subsegment("name", opts, fn trace_value ->
+  # trace_value is an empty string if this context is out of trace
   do_your_job()
 end)
 ```
