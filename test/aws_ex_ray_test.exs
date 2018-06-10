@@ -120,7 +120,8 @@ defmodule AwsExRayTest do
 
       Process.sleep(10)
 
-      sub_result = AwsExRay.subsegment("SimpleSub", [namespace: :none], fn ->
+      sub_result = AwsExRay.subsegment("SimpleSub",
+                                       fn _trace_value ->
 
         Process.sleep(10)
 
@@ -171,7 +172,12 @@ defmodule AwsExRayTest do
 
       Process.sleep(10)
 
-      AwsExRay.subsegment("SimpleSub", %{"MyLogic" => "Job1"}, [namespace: :none], fn ->
+      annotations = %{"MyLogic" => "Job1"}
+
+      AwsExRay.subsegment("SimpleSub",
+                          annotations,
+                          [namespace: :none],
+                          fn _trace_value ->
 
         Process.sleep(10)
 
