@@ -216,7 +216,7 @@ end)
 This is same as,
 
 ```elixir
-AwsExRay.finish_tracing(segment)
+trace = Trace.new()
 segment = AwsExRay.start_tracing(trace, "root_segment_name")
 result = do_your_job()
 AwsExRay.finish_tracing(segment)

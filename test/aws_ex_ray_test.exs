@@ -88,7 +88,7 @@ defmodule AwsExRayTest do
 
     {:ok, trace} = Trace.parse("Root=root1;Parent=parent1;Sampled=1")
 
-    AwsExRay.trace(trace, "SimpleWay", %{"MyLogicType" => "Foobar"}, fn ->
+    AwsExRay.trace(trace, "SimpleWay", %{"MyLogicType1" => "Foobar", "MyLogicType2" => "Barbuz"}, fn ->
       Process.sleep(10)
     end)
 
@@ -98,7 +98,8 @@ defmodule AwsExRayTest do
     assert_subset(s1, %{
       "name" => "SimpleWay",
       "annotations" => %{
-        "MyLogicType" => "Foobar",
+        "MyLogicType1" => "Foobar",
+        "MyLogicType2" => "Barbuz",
       },
       "metadata" => %{
         "tracing_sdk" => %{

@@ -44,6 +44,17 @@
     @spec id(seg :: t) :: String.t
     def id(seg), do: seg.segment.id
 
+    @spec add_annotations(
+      seg         :: t,
+      annotations :: map
+    ) :: t
+    def add_annotations(seg, annotations) do
+      annotations
+      |> Enum.reduce(seg, fn {key, value}, seg ->
+        add_annotation(seg, key, value)
+      end)
+    end
+
     @spec add_annotation(
       seg   :: t,
       key   :: atom | String.t,

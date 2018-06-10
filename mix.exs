@@ -4,7 +4,7 @@ defmodule AwsExRay.MixProject do
   def project do
     [
       app: :aws_ex_ray,
-      version: "0.1.6",
+      version: "0.1.7",
       elixir: "~> 1.6",
       package: package(),
       start_permanent: Mix.env() == :prod,
@@ -41,7 +41,7 @@ defmodule AwsExRay.MixProject do
       licenses: ["MIT"],
       links: %{
         "Github" => "https://github.com/lyokato/aws_ex_ray",
-        "Docs" => "https://hexdocs.pm/aws_ex_ray"
+        "Docs" => "https://hexdocs.pm/aws_ex_ray/AwsExRay.html"
       },
       maintainers: ["Lyo Kato"]
     ]
