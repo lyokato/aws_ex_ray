@@ -265,6 +265,11 @@ defmodule AwsExRay do
 
   end
 
+  @spec start_tracing(
+    name :: String.t
+  ) :: Segment.t
+  def start_tracing(name), do: start_tracing(Trace.new(), name)
+
   @spec finish_tracing(segment :: Segment.t) :: :ok
 
   def finish_tracing(segment) do
@@ -309,6 +314,12 @@ defmodule AwsExRay do
     func  :: fun
   ) :: any
   def trace(trace, name, func), do: trace(trace, name, %{}, func)
+
+  @spec trace(
+    name  :: String.t,
+    func  :: fun
+  ) :: any
+  def trace(name, func), do: trace(Trace.new(), name, %{}, func)
 
   @spec start_subsegment(
     name :: String.t,
