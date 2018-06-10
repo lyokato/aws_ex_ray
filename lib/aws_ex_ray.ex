@@ -199,7 +199,8 @@ defmodule AwsExRay do
 
   ```elixir
   opts = [namespace: :none]
-  result = AwsExRay.subsegment("name", opts, fn ->
+  result = AwsExRay.subsegment("name", opts, fn trace_value ->
+    # trace_value is an empty string if this context is out of trace
     do_your_job()
   end)
   ```
@@ -391,10 +392,23 @@ defmodule AwsExRay do
     func        :: fun
   ) :: :ok
   def subsegment(name, annotations, opts, func) do
+
     subsegment_state = start_subsegment(name, opts)
+
+    trace_value =
+      case subsegment_state do
+        {:ok, subsegment} ->
+          Subsegment.generate_trace_value(subsegment)
+        {:error, :out_of_xray} ->
+          ""
+      end
+
     try do
-      func.()
+
+      func.(trace_value)
+
     after
+
       case subsegment_state do
 
         {:ok, subsegment} ->
@@ -406,6 +420,7 @@ defmodule AwsExRay do
           :ok
 
       end
+
     end
   end
 
@@ -415,5 +430,11 @@ defmodule AwsExRay do
     func :: fun
   ) :: :ok
   def subsegment(name, opts, func), do: subsegment(name, %{}, opts, func)
+
+  @spec subsegment(
+    name :: String.t,
+    func :: fun
+  ) :: :ok
+  def subsegment(name, func), do: subsegment(name, %{}, [namespace: :none], func)
 
 end

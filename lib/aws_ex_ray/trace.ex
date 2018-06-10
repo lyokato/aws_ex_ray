@@ -48,6 +48,14 @@ defmodule AwsExRay.Trace do
   @spec parse(String.t) :: {:ok, Trace.t} | {:error, :not_found}
   def parse(value), do: Formatter.parse(value)
 
+  @spec parse_or_new(String.t) :: Trace.t
+  def parse_or_new(value) do
+    case parse(value) do
+      {:ok, trace}         -> trace
+      {:error, :not_found} -> new()
+    end
+  end
+
   @spec to_string(t) :: String.t
   def to_string(trace), do: Formatter.to_string(trace)
 
