@@ -364,7 +364,7 @@ put `AwsExRay.ExAws.HTTPClient` to `:http_client` setting.
 
 ```elixir
 config :ex_aws,
-  http_client: AwxExRay.ExAws.HTTPClient
+  http_client: AwsExRay.ExAws.HTTPClient
 ```
 
 Then automatically record subsegment if HTTP request toward AWS-Services called on the tracing process.
