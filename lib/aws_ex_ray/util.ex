@@ -24,6 +24,11 @@
       SecureRandom.hex(8)
     end
 
+    @spec sample?() :: boolean
+    def sample?() do
+      :rand.uniform() <= AwsExRay.Config.sampling_rate
+    end
+
     @spec get_header(keyword, String.t, String.t) :: String.t
     def get_header(headers, name, default \\ "") do
       case Enum.filter(headers, fn {k, _} -> String.downcase(k) == name end) do

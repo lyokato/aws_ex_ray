@@ -6,6 +6,7 @@ defmodule AwsExRay.Trace.Formatter do
   """
 
   alias AwsExRay.Trace
+  alias AwsExRay.Util
 
   @spec parse(header :: String.t)
   :: {:ok, Trace.t}
@@ -19,7 +20,7 @@ defmodule AwsExRay.Trace.Formatter do
 
       root    = Map.get(m, "root")
       parent  = Map.get(m, "parent", "")
-      sampled = Map.get(m, "sampled", "0") == "1"
+      sampled = sample?(m)
 
       trace = AwsExRay.Trace.with_params(
         root,
@@ -35,6 +36,19 @@ defmodule AwsExRay.Trace.Formatter do
 
     end
 
+  end
+
+  defp sample?(m) do
+    if Map.has_key?(m, "sampled") do
+      case Map.get(m, "sampled") do
+        "0" -> false
+        "1" -> true
+        "?" -> Util.sample?
+        _   -> Util.sample?
+      end
+    else
+      Util.sample?
+    end
   end
 
   defp parse_to_map(nil), do: %{}
