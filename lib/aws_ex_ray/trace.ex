@@ -4,7 +4,6 @@ defmodule AwsExRay.Trace do
   This module provides data structure which represents X-Ray's **trace**
   """
 
-  alias AwsExRay.Config
   alias AwsExRay.Trace
   alias AwsExRay.Trace.Formatter
   alias AwsExRay.Util
@@ -23,7 +22,7 @@ defmodule AwsExRay.Trace do
   def new() do
     %__MODULE__{
       root:    Util.generate_trace_id(),
-      sampled: sample?(),
+      sampled: Util.sample?(),
       parent:  "",
     }
   end
@@ -39,10 +38,6 @@ defmodule AwsExRay.Trace do
       sampled:  sampled,
       parent:   parent
     }
-  end
-
-  defp sample?() do
-    :rand.uniform() <= Config.sampling_rate
   end
 
   @spec parse(String.t) :: {:ok, Trace.t} | {:error, :not_found}

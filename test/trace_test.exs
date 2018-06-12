@@ -1,5 +1,5 @@
 defmodule AwsExRay.Test.TraceTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias AwsExRay.Trace
 
@@ -33,10 +33,21 @@ defmodule AwsExRay.Test.TraceTest do
     assert t3.sampled == false
     assert t3.parent == "foobar"
 
+    rate_backup = Application.get_env(:aws_ex_ray, :sampling_rate)
+    Application.put_env(:aws_ex_ray, :sampling_rate, 1.0)
+
     {:ok, t4} = Trace.parse("Root=hoge")
     assert t4.root == "hoge"
-    assert t4.sampled == false
+    assert t4.sampled == true
     assert t4.parent == ""
+
+    Application.put_env(:aws_ex_ray, :sampling_rate, 0.0)
+    {:ok, t5} = Trace.parse("Root=hoge")
+    assert t5.root == "hoge"
+    assert t5.sampled == false
+    assert t5.parent == ""
+
+    Application.put_env(:aws_ex_ray, :sampling_rate, rate_backup)
 
     assert Trace.parse("Parent=foobar;Sampled=1") == {:error, :not_found}
   end
