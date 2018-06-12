@@ -57,8 +57,15 @@ defmodule AwsExRay.Config do
     address = get(:daemon_address,
                   @default_daemon_address)
 
+    charlist_address = address |> String.to_charlist()
+
     {:ok, ip_address} =
-      address |> String.to_charlist() |> :inet.parse_address()
+      case :inet.getaddr(charlist_address, :inet) do
+        {:ok, ip_address} ->
+          {:ok, ip_address}
+        {:error, _} ->
+          :inet.getaddr(charlist_address, :inet6)
+      end
 
     ip_address
 

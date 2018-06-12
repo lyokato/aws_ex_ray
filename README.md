@@ -282,7 +282,7 @@ config :aws_ex_ray,
 |sampling_rate|0.1|set number between 0.0 - 1.0. recommended that set 0.0 for 'test' environment|
 |default_annotation|%{}|annotation parameters automatically put into segment/subsegment|
 |default_metadata|%{}|metadata parameters automatically put into segment/subsegment|
-|daemon_address|127.0.0.1|your xray daemon's IP address. typically, you don't need to customize this.|
+|daemon_address|127.0.0.1|your xray daemon's host name. typically, you don't need to customize this.|
 |daemon_port|2000|your xray daemon's port. typically, you don't need to customize this.|
 |default_client_pool_size|10|number of UDP client which connects to xray daemon|
 |default_client_pool_overflow|100|overflow capacity size of UDP client|
@@ -364,7 +364,7 @@ put `AwsExRay.ExAws.HTTPClient` to `:http_client` setting.
 
 ```elixir
 config :ex_aws,
-  http_client: AwxExRay.ExAws.HTTPClient
+  http_client: AwsExRay.ExAws.HTTPClient
 ```
 
 Then automatically record subsegment if HTTP request toward AWS-Services called on the tracing process.
