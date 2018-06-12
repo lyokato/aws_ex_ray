@@ -35,7 +35,7 @@
         m
       else
         error = Error.to_map(seg.error)
-        Map.put(m, :error, error)
+        Map.merge(m, error)
       end
     end
 
