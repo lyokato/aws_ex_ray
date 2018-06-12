@@ -13,9 +13,8 @@
 
     def to_map(seg) do
 
-      m = AwsExRay.Segment.Formatter.to_map(seg.segment)
-
-      m
+      seg.segment
+      |> AwsExRay.Segment.Formatter.to_map()
       |> Map.put(:type, "subsegment")
       |> embed_namespace(seg)
       |> embed_sql(seg)
