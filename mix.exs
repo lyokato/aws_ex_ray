@@ -27,7 +27,7 @@ defmodule AwsExRay.MixProject do
     [
       {:mox, "~> 0.3.2", only: :test},
       {:credo, "~> 0.3", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.15", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:poison, "~> 3.1"},
       {:poolboy, "~> 1.5"},
       {:struct_assert, "~> 0.5.2", only: :test},
