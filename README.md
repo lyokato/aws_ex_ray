@@ -23,7 +23,7 @@ end
 
 def deps do
   [
-    {:aws_ex_ray, "~> 0.1"},
+    {:aws_ex_ray, "~> 0.1.13"},
 
     # add support libraries as you like
     {:aws_ex_ray_plug, "~> 0.1"},
