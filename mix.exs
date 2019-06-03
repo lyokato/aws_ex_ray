@@ -4,7 +4,7 @@ defmodule AwsExRay.MixProject do
   def project do
     [
       app: :aws_ex_ray,
-      version: "0.1.12",
+      version: "0.1.13",
       elixir: "~> 1.6",
       package: package(),
       start_permanent: Mix.env() == :prod,
