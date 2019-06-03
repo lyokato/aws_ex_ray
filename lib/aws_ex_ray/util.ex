@@ -13,7 +13,7 @@
     @spec generate_trace_id() :: String.t
     def generate_trace_id() do
       t = DateTime.utc_now
-          |> DateTime.to_unix(:seconds)
+          |> DateTime.to_unix(:second)
           |> Integer.to_string(16)
           |> String.downcase()
       "1-#{t}-#{SecureRandom.hex(12)}"
