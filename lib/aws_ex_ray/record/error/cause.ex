@@ -47,9 +47,9 @@ defmodule AwsExRay.Record.Error.Cause do
   end
 
   defp cwd() do
-    case System.cwd() do
-      nil -> ""
-      dir -> dir
+    case File.cwd() do
+      {:ok, dir} -> dir
+      _ -> ""
     end
   end
 
