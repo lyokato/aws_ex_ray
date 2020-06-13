@@ -6,7 +6,7 @@
 
     @spec now() :: float
     def now() do
-      ms = DateTime.utc_now |> DateTime.to_unix(:microseconds)
+      ms = DateTime.utc_now |> DateTime.to_unix(:microsecond)
       ms / 1_000_000
     end
 
