@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.1.16] - 2020/06/13
+
+### CHANGED
+
+- fix: Removes deprecated time unit (https://github.com/lyokato/aws_ex_ray/pull/18). thanks to Efesto.
+
 ## [0.1.15] - 2019/07/11
 
 ### CHANGED
