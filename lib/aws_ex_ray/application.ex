@@ -12,6 +12,7 @@ defmodule AwsExRay.Application do
     AwsExRay.Store.Table.init()
 
     children = [
+      {AwsExRay.Rules, []},
       {AwsExRay.Client, []},
       {AwsExRay.Store.MonitorSupervisor, []}
     ]

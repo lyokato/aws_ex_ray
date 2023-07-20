@@ -10,8 +10,12 @@ defmodule AwsExRay.Trace do
 
   @type t :: %__MODULE__{
     root:    String.t,
-    sampled: boolean,
+    sampled: boolean | :undefined,
     parent:  String.t
+  }
+
+  @type request_map :: %{
+    optional(:service_name | :service_type | :http_method | :host | :url_path | :resource_arn) => string()
   }
 
   defstruct root:     "",
@@ -19,10 +23,16 @@ defmodule AwsExRay.Trace do
             parent:   ""
 
   @spec new() :: t
+  @deprecated "Use new/1 instead"
   def new() do
+    new(%{})
+  end
+
+  @spec new(request_map) :: t
+  def new(request) do
     %__MODULE__{
       root:    Util.generate_trace_id(),
-      sampled: Util.sample?(),
+      sampled: Util.sample?(request),
       parent:  "",
     }
   end
@@ -43,11 +53,15 @@ defmodule AwsExRay.Trace do
   @spec parse(String.t) :: {:ok, Trace.t} | {:error, :not_found}
   def parse(value), do: Formatter.parse(value)
 
-  @spec parse_or_new(String.t) :: Trace.t
-  def parse_or_new(value) do
+  @spec parse_or_new(String.t, request_map) :: Trace.t
+  def parse_or_new(value, request \\ %{}) do
     case parse(value) do
-      {:ok, trace}         -> trace
-      {:error, :not_found} -> new()
+      {:ok, %__MODULE__{sampled: :undefined} = trace} ->
+        %{trace | sampled: Util.sample?(request)}
+      {:ok, %__MODULE__{sampled: sampled} = trace} when is_boolean(sampled) ->
+        trace
+      {:error, :not_found} ->
+        new(request)
     end
   end
 

@@ -38,11 +38,20 @@
 
     @spec new(trace :: Trace.t, name :: String.t) :: t
     def new(trace, name) do
+      trace_sampled =
+        case trace.sampled do
+          :undefined ->
+            # If the trace doesn't specify whether it's sampled,
+            # we'll need to make a decision one way or the other.
+            %{trace | sampled: Util.sample?()}
+          sampled when is_boolean(sampled) ->
+            trace
+        end
       %__MODULE__{
         id:         Util.generate_model_id(),
         name:       name,
         version:    Config.service_version(),
-        trace:      trace,
+        trace:      trace_sampled,
         start_time: Util.now(),
         error:      nil,
         end_time:   0.0,

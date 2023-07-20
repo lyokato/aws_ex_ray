@@ -25,8 +25,15 @@
     end
 
     @spec sample?() :: boolean
+    @deprecated "Use sample?/1 instead"
     def sample?() do
-      :rand.uniform() <= AwsExRay.Config.sampling_rate
+      sample?(%{})
+    end
+
+    @spec sample?(AwsExRay.Trace.request_map) :: boolean
+    def sample?(request) do
+      rules = AwsExRay.Rules.get()
+      AwsExRay.Rules.sample?(request, rules)
     end
 
     @spec get_header(keyword, String.t, String.t) :: String.t

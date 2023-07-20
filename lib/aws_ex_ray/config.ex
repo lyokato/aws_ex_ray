@@ -33,6 +33,7 @@ defmodule AwsExRay.Config do
   @default_store_monitor_pool_size 10
   @default_client_module        AwsExRay.Client.UDPClientSupervisor
   @default_sandbox_sink_module  AwsExRay.Client.Sandbox.Sink.Ignore
+  @default_rules_module         AwsExRay.Rules.SamplingRate
 
   @spec library_name() :: String.t
   def library_name(), do: "aws-ex-ray"
@@ -115,6 +116,12 @@ defmodule AwsExRay.Config do
   def sandbox_sink_module() do
     get(:sandbox_sink_module,
         @default_sandbox_sink_module)
+  end
+
+  @spec rules_module() :: module
+  def rules_module() do
+    get(:rules_module,
+        @default_rules_module)
   end
 
   @spec service_version() :: String.t

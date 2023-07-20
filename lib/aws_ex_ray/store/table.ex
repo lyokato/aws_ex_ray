@@ -26,7 +26,7 @@ defmodule AwsExRay.Store.Table do
   end
 
   @spec lookup()
-  :: {:ok, Trace.t, String.t}
+  :: {:ok, Trace.t, String.t, list}
   |  {:error, :not_found}
 
   def lookup() do
@@ -34,7 +34,7 @@ defmodule AwsExRay.Store.Table do
   end
 
   @spec lookup(pid :: pid)
-  :: {:ok, Trace.t, String.t}
+  :: {:ok, Trace.t, String.t, list}
   |  {:error, :not_found}
 
   def lookup(pid) do

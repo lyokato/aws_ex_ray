@@ -1,4 +1,5 @@
 Mox.defmock(AwsExRay.Client.Sandbox.Sink.Stub, for: AwsExRay.Client.Sandbox.Sink.Behaviour)
+Mox.defmock(AwsExRay.Rules.Client.Stub, for: AwsExRay.Rules.Client.Behaviour)
 
 defmodule AwsExRay.Test.Mox do
 

@@ -272,6 +272,7 @@ end)
 
 ```elixir
 config :aws_ex_ray,
+  rules_module: AwsExRay.Rules.SamplingRate,
   sampling_rate: 0.1,
   default_annotation: %{foo: "bar"},
   default_metadata: %{bar: "buz"}
@@ -279,6 +280,7 @@ config :aws_ex_ray,
 
 |key|default|description|
 |:--|:--|:--|
+|rules_module|AwsExRay.Rules.SamplingRate|see below|
 |sampling_rate|0.1|set number between 0.0 - 1.0. recommended that set 0.0 for 'test' environment|
 |default_annotation|%{}|annotation parameters automatically put into segment/subsegment|
 |default_metadata|%{}|metadata parameters automatically put into segment/subsegment|
@@ -287,6 +289,37 @@ config :aws_ex_ray,
 |default_client_pool_size|10|number of UDP client which connects to xray daemon|
 |default_client_pool_overflow|100|overflow capacity size of UDP client|
 |default_store_monitor_pool_size|10|number of tracing-process-monitor|
+
+### Sampling rules
+
+There are different ways to configure how to decide which requests to
+sample. The default `rules_module` is
+`AwsExRay.Rules.SamplingRate`. It uses the `sampling_rate` setting to
+determine how many requests to sample. For example, if `sampling_rate`
+is set to the default of `0.1`, every request has a 10% chance of
+being sampled.
+
+You can also set `rules_module` to `AwsExRay.Rules.OnlineRules`. With
+this module, the `sampling_rate` setting is ignored. Instead, it
+fetches sampling rules from AWS X-Ray, as described here:
+https://docs.aws.amazon.com/xray/latest/devguide/xray-console-sampling.html
+
+`Trace.new` expects a map with the following keys:
+
+- `service_name`
+- `service_type`
+- `http_method`
+- `host`
+- `url_path`
+- `resource_arn`
+
+It compares the values in the map with the rules configured in AWS
+X-Ray. If a value is missing from the map, it matches only if the rule
+has a wildcard for that field.
+
+The highest-priority rule that matches the values in the map is
+picked, and the sampling rate and reservoir size are used to determine
+whether the request should be sampled.
 
 ## Support Libraries
 

@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :aws_ex_ray,
   sampling_rate: 1.0,
