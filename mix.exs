@@ -21,7 +21,7 @@ defmodule AwsExRay.MixProject do
 
   def application do
     [
-      applications: [:logger, :poolboy],
+      extra_applications: [:logger, :poolboy],
       mod: {AwsExRay.Application, []}
     ]
   end
