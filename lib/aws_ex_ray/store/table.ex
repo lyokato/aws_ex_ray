@@ -46,6 +46,11 @@ defmodule AwsExRay.Store.Table do
         {:ok, trace, segment_id, subsegments}
 
     end
+  rescue
+    ArgumentError ->
+      # The lookup function was called before the application had started,
+      # so the ETS table doesn't exist yet.
+      {:error, :not_found}
   end
 
   @spec push_subsegment(String.t) :: :ok
@@ -83,6 +88,10 @@ defmodule AwsExRay.Store.Table do
   def delete(pid) do
     :ets.delete(@table, pid)
     :ok
+  rescue
+    ArgumentError ->
+      # The table doesn't exist. Ignore.
+      :ok
   end
 
 end
