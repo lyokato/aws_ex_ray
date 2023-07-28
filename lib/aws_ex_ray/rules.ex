@@ -320,4 +320,61 @@ defmodule AwsExRay.Rules do
   defp maybe_cancel_timer(timer) when is_reference(timer) do
     Process.cancel_timer(timer)
   end
+
+  @doc """
+  Return the current sample rules as a human-readable string.
+  """
+  def to_string() do
+    get()
+    |> Enum.map_join("\n", fn %{
+                                rule_arn: rule_arn,
+                                rule_name: rule_name,
+                                reservoir_variables: reservoir_variables,
+                                counters: counters
+                              } = rule ->
+      match_fields = [:service_name, :service_type, :http_method, :host, :url_path, :resource_arn]
+
+      matches =
+        rule
+        |> Map.take(match_fields)
+        |> Enum.reject(fn {_key, match} -> match == :wildcard end)
+        |> case do
+          [] ->
+            "Matches anything"
+
+          match_entries ->
+            "Matches: " <>
+              Enum.map_join(match_entries, ", ", fn
+                {key, {:literal, literal}} ->
+                  "#{key} = \"#{literal}\""
+
+                {key, {:regex, regex}} ->
+                  "#{key} ~= /#{Regex.source(regex)}/"
+              end)
+        end
+
+      reservoir_quota = :atomics.get(reservoir_variables, 1)
+
+      reservoir_quota_ttl =
+        :atomics.get(reservoir_variables, 2) |> DateTime.from_unix!() |> DateTime.to_iso8601()
+
+      reservoir_size = :atomics.get(reservoir_variables, 3)
+
+      reservoir_last_used =
+        (:atomics.get(reservoir_variables, 4) + System.time_offset(:second))
+        |> DateTime.from_unix!()
+        |> DateTime.to_iso8601()
+
+      fixed_sample_rate = :atomics.get(reservoir_variables, 5)
+
+      """
+      Rule name: "#{rule_name}" ARN: #{rule_arn}
+      #{matches}
+      Borrow count: #{:counters.get(counters, 1)} Sampled count: #{:counters.get(counters, 2)} Request count: #{:counters.get(counters, 3)}
+      Reservoir quota: #{reservoir_quota} Reservoir quota TTL: #{reservoir_quota_ttl}
+      Reservoir size: #{reservoir_size} Reservoir last used: #{reservoir_last_used}
+      Fixed sample rate (per million): #{fixed_sample_rate}
+      """
+    end)
+  end
 end
