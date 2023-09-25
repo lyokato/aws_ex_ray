@@ -268,6 +268,7 @@ defmodule AwsExRay do
   @spec start_tracing(
     name :: String.t
   ) :: Segment.t
+  @deprecated "Use start_tracing/2 instead"
   def start_tracing(name), do: start_tracing(Trace.new(), name)
 
   @spec finish_tracing(segment :: Segment.t) :: :ok
@@ -319,6 +320,7 @@ defmodule AwsExRay do
     name  :: String.t,
     func  :: fun
   ) :: any
+  @deprecated "Use trace/3 instead"
   def trace(name, func), do: trace(Trace.new(), name, %{}, func)
 
   @spec start_subsegment(

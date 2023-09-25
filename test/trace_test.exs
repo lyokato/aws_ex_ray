@@ -5,13 +5,13 @@ defmodule AwsExRay.Test.TraceTest do
 
   test "trace format" do
     t = Trace.new()
-    assert "#{t}" == "Root=#{t.root};Sampled=1"
-
-    t = %{t|sampled: false}
     assert "#{t}" == "Root=#{t.root};Sampled=0"
 
+    t = %{t|sampled: true}
+    assert "#{t}" == "Root=#{t.root};Sampled=1"
+
     t = %{t|parent: "foobar"}
-    assert "#{t}" == "Root=#{t.root};Parent=foobar;Sampled=0"
+    assert "#{t}" == "Root=#{t.root};Parent=foobar;Sampled=1"
 
   end
 
@@ -38,13 +38,15 @@ defmodule AwsExRay.Test.TraceTest do
 
     {:ok, t4} = Trace.parse("Root=hoge")
     assert t4.root == "hoge"
-    assert t4.sampled == true
+    # Just parsing a trace value doesn't assign a sample flag
+    assert t4.sampled == :undefined
     assert t4.parent == ""
 
     Application.put_env(:aws_ex_ray, :sampling_rate, 0.0)
     {:ok, t5} = Trace.parse("Root=hoge")
     assert t5.root == "hoge"
-    assert t5.sampled == false
+    # Likewise
+    assert t5.sampled == :undefined
     assert t5.parent == ""
 
     Application.put_env(:aws_ex_ray, :sampling_rate, rate_backup)

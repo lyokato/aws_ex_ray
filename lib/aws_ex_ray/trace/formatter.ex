@@ -6,7 +6,6 @@ defmodule AwsExRay.Trace.Formatter do
   """
 
   alias AwsExRay.Trace
-  alias AwsExRay.Util
 
   @spec parse(header :: String.t)
   :: {:ok, Trace.t}
@@ -39,15 +38,10 @@ defmodule AwsExRay.Trace.Formatter do
   end
 
   defp sample?(m) do
-    if Map.has_key?(m, "sampled") do
-      case Map.get(m, "sampled") do
-        "0" -> false
-        "1" -> true
-        "?" -> Util.sample?
-        _   -> Util.sample?
-      end
-    else
-      Util.sample?
+    case Map.fetch(m, "sampled") do
+      {:ok, "0"} -> false
+      {:ok, "1"} -> true
+      _          -> :undefined
     end
   end
 
@@ -78,5 +72,6 @@ defmodule AwsExRay.Trace.Formatter do
 
   defp add_sampled_if_needed(value, false), do: value <> ";Sampled=0"
   defp add_sampled_if_needed(value, true), do: value <> ";Sampled=1"
+  defp add_sampled_if_needed(value, :undefined), do: value
 
 end
